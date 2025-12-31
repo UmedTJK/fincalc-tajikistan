@@ -15,13 +15,16 @@
 
 ## 🚀 Текущая версия проекта
 
-```
+## v0.4.2
+### Changed
+- Extracted bank deposit data into `modules/banks.js`
+- Improved modular structure without changing calculation logic
+
+## v0.4.1
+- refactor: moved monthly interest calculation to interest module
 
 v0.4.0 — расчетный движок + графики + экспорт
 
-```
-
----
 
 ## 📈 Ближайшие версии
 
