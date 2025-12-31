@@ -15,6 +15,20 @@
 
 ## 🚀 Текущая версия проекта
 
+## v0.4.5
+### Changed
+- Extracted PDF export logic into `modules/export/pdf.js`
+- Unified export architecture (CSV & PDF)
+
+
+## v0.4.4
+### Changed
+- Stabilized modular architecture after CSV and charts refactor
+- Extracted chart data preparation into `modules/charts.js`
+- Extracted CSV export logic into `modules/export/csv.js`
+- Implemented proper comparison of capitalization scenarios
+
+
 ## v0.4.3
 ### Changed
 - Extracted CSV export logic into `modules/export/csv.js`
