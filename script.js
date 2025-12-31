@@ -287,11 +287,32 @@ function calculateDeposit() {
     document.getElementById('totalInterest').textContent = formatNumber(totalInterest);
     document.getElementById('finalAmount').textContent = formatNumber(finalAmount);
 
-    // Обновляем таблицу и график
-    renderCalculationsTable(calculations, formatNumber);
-    const chartData = calculateAllCapitalizationScenarios();
-    updateChart(chartData);
-    } // ← ВОТ ЭТОГО НЕ ХВАТАЛО
+// Обновляем таблицу
+renderCalculationsTable(calculations, formatNumber);
+
+// 🧷 Контроль: расчёты
+console.assert(
+  Array.isArray(calculations) && calculations.length > 0,
+  '[FinCalc] calculations пуст — таблица не получит данные'
+);
+
+// Готовим данные для графика
+const chartData = calculateAllCapitalizationScenarios();
+
+// 🧷 Контроль: данные для графика
+console.assert(
+  chartData &&
+  Array.isArray(chartData.labels) &&
+  Object.keys(chartData.series || {}).length > 0,
+  '[FinCalc] chartData некорректен — график не получит данные'
+);
+
+// Обновляем график
+updateChart(chartData);
+
+    
+} // ← ВОТ ЭТОГО НЕ ХВАТАЛО
+
     
 
 

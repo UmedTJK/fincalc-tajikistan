@@ -11,7 +11,7 @@ let shareData = null;
  * Prepare share data from current calculation
  * @param {Object} params
  */
-function prepareShareData(params) {
+export function prepareShareData(params) {
   const {
     initialDeposit,
     annualRate,
@@ -31,13 +31,17 @@ function prepareShareData(params) {
     termMonths,
     finalAmount,
     totalInterest,
+    formatNumber,
     url: window.location.href,
-    timestamp: new Date().toLocaleString('ru-RU'),
-    formatNumber
+    timestamp: new Date().toLocaleString('ru-RU')
   };
 
   return shareData;
 }
+
+/* =======================
+   Helpers
+======================= */
 
 function showNotification(message) {
   const notification = document.createElement('div');
@@ -66,10 +70,15 @@ function showNotification(message) {
 }
 
 function fallbackShare(text) {
-  navigator.clipboard.writeText(text)
+  navigator.clipboard
+    .writeText(text)
     .then(() => showNotification('✅ Текст скопирован в буфер обмена!'))
     .catch(() => alert('📋 Скопируйте текст:\n\n' + text));
 }
+
+/* =======================
+   Share actions
+======================= */
 
 export function shareCalculation(text) {
   if (navigator.share) {
@@ -77,21 +86,6 @@ export function shareCalculation(text) {
       title: 'Расчёт депозита — FinCalc.TJ',
       text
     });
-  } else {
-    navigator.clipboard.writeText(text);
-    showToast('Текст скопирован в буфер обмена!');
-  }
-}
-
-
-🔗 ${data.url}`;
-
-  if (navigator.share) {
-    navigator.share({
-      title: 'Расчет депозита - FinCalc.TJ',
-      text,
-      url: data.url
-    }).catch(() => fallbackShare(text));
   } else {
     fallbackShare(text);
   }
@@ -107,9 +101,10 @@ export function hideShareOptions() {
 
 export function shareAsText() {
   if (!shareData) return;
+
   const { formatNumber } = shareData;
 
-  const text = `💰 РАСЧЕТ ДЕПОЗИТА - FinCalc.TJ
+  const text = `💰 РАСЧЕТ ДЕПОЗИТА — FinCalc.TJ
 
 📊 Параметры:
 • Начальная сумма: ${formatNumber(shareData.initialDeposit)} TJS
@@ -121,30 +116,41 @@ export function shareAsText() {
 📈 Результаты:
 • Итоговая сумма: ${formatNumber(shareData.finalAmount)} TJS
 • Общий доход: ${formatNumber(shareData.totalInterest)} TJS
-• Дата расчета: ${shareData.timestamp}
+• Дата расчёта: ${shareData.timestamp}
 
 🔗 ${shareData.url}`;
 
   if (navigator.share) {
-    navigator.share({ title: 'Мой расчет депозита', text, url: shareData.url });
-  } else {
-    navigator.clipboard.writeText(text).then(() => {
-      showNotification('✅ Текст скопирован!');
-      hideShareOptions();
+    navigator.share({
+      title: 'Мой расчёт депозита',
+      text,
+      url: shareData.url
     });
+  } else {
+    fallbackShare(text);
   }
+
+  hideShareOptions();
 }
 
 export function shareAsImage(takeChartScreenshot) {
+  if (typeof takeChartScreenshot !== 'function') return;
+
   takeChartScreenshot();
+  showNotification('📸 Скриншот графика сохранён!');
   hideShareOptions();
-  showNotification('📸 Скриншот графика сохранен!');
 }
 
 export function shareToSocial() {
   if (!shareData) return;
-  const text = encodeURIComponent('Посмотрите мой расчет депозита на FinCalc.TJ!');
+
+  const text = encodeURIComponent('Посмотрите мой расчёт депозита на FinCalc.TJ!');
   const url = encodeURIComponent(shareData.url);
-  window.open(`https://t.me/share/url?url=${url}&text=${text}`, '_blank');
+
+  window.open(
+    `https://t.me/share/url?url=${url}&text=${text}`,
+    '_blank'
+  );
+
   hideShareOptions();
 }

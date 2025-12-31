@@ -5,11 +5,15 @@
  * @param {Array} calculations
  * @param {Function} formatNumber
  */
+
+
 export function renderCalculationsTable(calculations, formatNumber) {
   const tbody = document.getElementById('calculationsBody');
   if (!tbody) return;
+  if (!Array.isArray(calculations) || calculations.length === 0) return;
 
   tbody.innerHTML = '';
+
 
 calculations.forEach(calc => {
   const row = tbody.insertRow();
