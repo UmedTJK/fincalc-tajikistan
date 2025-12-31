@@ -15,6 +15,11 @@
 
 ## 🚀 Текущая версия проекта
 
+## v0.4.3
+### Changed
+- Extracted CSV export logic into `modules/export/csv.js`
+- Simplified `exportToExcel()` UI controller
+
 ## v0.4.2
 ### Changed
 - Extracted bank deposit data into `modules/banks.js`

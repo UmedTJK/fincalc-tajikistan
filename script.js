@@ -1,5 +1,8 @@
 import { calculateMonthlyInterest } from './modules/interest.js';
 import { banksData } from './modules/banks.js';
+import { generateCSVReport } from './modules/export/csv.js';
+import { buildTimeSeries, buildComparisonSeries } from './modules/charts.js';
+
 
 
 
@@ -126,50 +129,17 @@ function calculateWithCapitalization() {
 
 // [МОДУЛЬ: Сравнение сценариев капитализации]
 function calculateAllCapitalizationScenarios() {
-    const initialDeposit = parseFloat(document.getElementById('initialDeposit').value) || 0;
-    const annualRate = (parseFloat(document.getElementById('annualRate').value) || 0) / 100;
-    const taxRate = (parseFloat(document.getElementById('taxRate').value) || 0) / 100;
-    const monthlyContribution = parseFloat(document.getElementById('monthlyContribution').value) || 0;
-    const termMonths = parseInt(document.getElementById('termMonths').value) || 1;
-    
-    const netAnnualRate = annualRate * (1 - taxRate);
-    
-    // Данные для всех сценариев
     const scenarios = {
-        'none': { label: 'Без капитализации', data: [], color: '#dc3545' },
-        'manual': { label: 'Ручная капитализация', data: [], color: '#fd7e14' },
-        'auto': { label: 'Автоматическая капитализация', data: [], color: '#28a745' }
+        'Без капитализации': calculateScenario('none'),
+        'Ручная капитализация': calculateScenario('manual'),
+        'Автоматическая капитализация': calculateScenario('auto')
     };
 
-    // Расчет для каждого сценария
-    for (const [type, scenario] of Object.entries(scenarios)) {
-        let currentAmount = initialDeposit;
-        scenario.data = [initialDeposit]; // Начальная сумма
-
-        for (let month = 1; month <= termMonths; month++) {
-            const monthlyInterest = currentAmount * (netAnnualRate / 12);
-            
-            let endAmount = currentAmount;
-            
-            switch (type) {
-                case 'auto':
-                    endAmount = currentAmount + monthlyInterest + monthlyContribution;
-                    break;
-                case 'manual':
-                    endAmount = currentAmount + monthlyInterest + monthlyContribution;
-                    break;
-                case 'none':
-                    endAmount = currentAmount + monthlyContribution;
-                    break;
-            }
-            
-            scenario.data.push(endAmount);
-            currentAmount = endAmount;
-        }
-    }
-
-    return scenarios;
+    return buildComparisonSeries(scenarios);
 }
+
+
+
 
 // Обновление таблицы с расчетами
 function updateTable() {
@@ -239,58 +209,38 @@ function calculateDeposit() {
     updateChart();
 }
 
+
 // Экспорт в Excel (CSV)
 function exportToExcel() {
-    const initialDeposit = parseFloat(document.getElementById('initialDeposit').value) || 0;
-    const annualRate = parseFloat(document.getElementById('annualRate').value) || 0;
-    const taxRate = parseFloat(document.getElementById('taxRate').value) || 0;
-    const monthlyContribution = parseFloat(document.getElementById('monthlyContribution').value) || 0;
-    const termMonths = parseInt(document.getElementById('termMonths').value) || 1;
-    
-    const netAnnualRate = (annualRate / 100) * (1 - (taxRate / 100));
-    const netMonthlyRate = netAnnualRate / 12;
-    const monthlyIncome = initialDeposit * netMonthlyRate;
+  const initialDeposit = parseFloat(document.getElementById('initialDeposit').value) || 0;
+  const annualRate = parseFloat(document.getElementById('annualRate').value) || 0;
+  const taxRate = parseFloat(document.getElementById('taxRate').value) || 0;
+  const monthlyContribution = parseFloat(document.getElementById('monthlyContribution').value) || 0;
+  const termMonths = parseInt(document.getElementById('termMonths').value) || 1;
 
-    let csvContent = "\uFEFF"; // BOM для правильной кодировки
-    
-    // Заголовок
-    csvContent += "КАЛЬКУЛЯТОР ДЕПОЗИТА\n\n";
-    
-    // Часть 1: Входные данные
-    csvContent += "ЧАСТЬ 1: ВВОД ДАННЫХ\n";
-    csvContent += "Параметр;Значение\n";
-    csvContent += `Начальная сумма депозита (TJS);${initialDeposit}\n`;
-    csvContent += `Годовая ставка (%);${annualRate}%\n`;
-    csvContent += `Налог на доход (%);${taxRate}%\n`;
-    csvContent += `Ежемесячное пополнение (TJS);${monthlyContribution}\n`;
-    csvContent += `Срок расчета (месяцев);${termMonths}\n\n`;
-    
-    // Часть 2: Расчетные поля
-    csvContent += "ЧАСТЬ 2: РАСЧЕТНЫЕ ПОЛЯ\n";
-    csvContent += "Параметр;Значение\n";
-    csvContent += `Чистая годовая ставка (%);${(netAnnualRate * 100).toFixed(4)}%\n`;
-    csvContent += `Чистая месячная ставка (%);${(netMonthlyRate * 100).toFixed(6)}%\n`;
-    csvContent += `Доход в месяц (на начальную сумму);${monthlyIncome.toFixed(2)}\n\n`;
-    
-    // Часть 3: Помесячный прогноз
-    csvContent += "ЧАСТЬ 3: ПОМЕСЯЧНЫЙ ПРОГНОЗ\n";
-    csvContent += "Месяц;Дата;Сумма в начале месяца;Начислено процентов;Подоходный налог (12%);Сумма капитализации;Ежемесячное пополнение;Сумма в конце месяца\n";
+  const csvContent = generateCSVReport({
+    initialDeposit,
+    annualRate,
+    taxRate,
+    monthlyContribution,
+    termMonths,
+    calculations,
+    formatNumber
+  });
 
-    calculations.forEach(calc => {
-    csvContent += `${calc.month};${calc.date};${calc.startAmount.toFixed(2)};${calc.interestEarned.toFixed(2)};${calc.taxAmount.toFixed(2)};${calc.capitalizedAmount.toFixed(2)};${calc.monthlyContribution.toFixed(2)};${calc.endAmount.toFixed(2)}\n`;
-    });
-    
-    // Создание и скачивание файла
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', 'deposit_calculator.csv');
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+
+  link.setAttribute('href', url);
+  link.setAttribute('download', 'deposit_calculator.csv');
+  link.style.visibility = 'hidden';
+
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }
+
 
 // Экспорт в PDF
 function exportToPDF() {
@@ -514,27 +464,25 @@ function initChart() {
 // Обновление данных графика
 function updateChart() {
     if (!depositChart) return;
-    
-    // Получаем данные для всех сценариев
-    const scenarios = calculateAllCapitalizationScenarios();
-    const termMonths = parseInt(document.getElementById('termMonths').value) || 1;
-    
-    // Подготовка меток для оси X
-    const months = [];
-    for (let i = 0; i <= termMonths; i++) {
-        months.push(i === 0 ? 'Старт' : `Месяц ${i}`);
-    }
-    
-    // Обновляем график
-    depositChart.data.labels = months;
-    
-    // Обновляем данные для каждого dataset
-    depositChart.data.datasets[0].data = scenarios.none.data;      // Без капитализации
-    depositChart.data.datasets[1].data = scenarios.manual.data;    // Ручная капитализация  
-    depositChart.data.datasets[2].data = scenarios.auto.data;      // Автоматическая капитализация
-    
+
+    const result = calculateAllCapitalizationScenarios();
+
+    // Метки по оси X (даты)
+    depositChart.data.labels = result.labels;
+
+    // Данные для линий
+    depositChart.data.datasets[0].data =
+        result.series['Без капитализации'] || [];
+
+    depositChart.data.datasets[1].data =
+        result.series['Ручная капитализация'] || [];
+
+    depositChart.data.datasets[2].data =
+        result.series['Автоматическая капитализация'] || [];
+
     depositChart.update();
 }
+
 
 // Функция для скриншота графика (для YouTube)
 function takeChartScreenshot() {
@@ -986,3 +934,17 @@ function initBanks() {
 }
 
 window.addEventListener("DOMContentLoaded", initBanks);
+
+function calculateScenario(type) {
+    const previousType = capitalizationType;
+
+    capitalizationType = type;
+    calculateWithCapitalization(); // пересчитывает глобальный `calculations`
+
+    const scenarioCalculations = [...calculations]; // КОПИЯ!
+
+    capitalizationType = previousType;
+
+    return scenarioCalculations;
+}
+
