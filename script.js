@@ -1,4 +1,7 @@
 import { calculateMonthlyInterest } from './modules/interest.js';
+import { banksData } from './modules/banks.js';
+
+
 
 
 // Глобальные переменные
@@ -74,14 +77,14 @@ function calculateWithCapitalization() {
         switch (capitalizationType) {
             case 'auto':
                 // Автоматическая: все проценты капитализируются
-                capitalizedAmount = netMonthlyInterest;
+                capitalizedAmount = net;
                 endAmount = currentAmount + capitalizedAmount + monthlyContribution;
                 break;
                 
             case 'manual':
                 // Ручная: пользователь решает капитализировать или нет
                 // Для простоты предположим, что пользователь капитализирует все
-                capitalizedAmount = netMonthlyInterest;
+                capitalizedAmount = net;
                 endAmount = currentAmount + capitalizedAmount + monthlyContribution;
                 break;
                 
@@ -97,18 +100,19 @@ function calculateWithCapitalization() {
             month: month,
             date: formattedDate,
             startAmount: currentAmount,
-            interestEarned: grossMonthlyInterest,
-            taxAmount: monthlyTax,
-            netInterest: netMonthlyInterest,
+            interestEarned: gross,
+            taxAmount: tax,
+            netInterest: net,
             capitalizedAmount: capitalizedAmount,
             monthlyContribution: monthlyContribution,
             endAmount: endAmount,
             capitalizationType: capitalizationType
         });
 
+
         currentAmount = endAmount;
-        totalInterest += grossMonthlyInterest;
-        totalTax += monthlyTax;
+        totalInterest += gross;
+        totalTax += tax;
         totalCapitalized += capitalizedAmount;
     }
 
@@ -869,176 +873,9 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 
-function applyDepositOption(deposit, option, selectedCurrency = null) {
-  const currency = selectedCurrency || Object.keys(option.rates)[0];
-  if (!option.rates[currency]) return;
-
-  document.getElementById("currency").value = currency;
-  document.getElementById("annualRate").value = option.rates[currency];
-  document.getElementById("initialDeposit").value = deposit.minAmount[currency] || 0;
-  document.getElementById("termMonths").value = option.term;
-  document.getElementById("capitalizationType").disabled = !deposit.capitalization;
-
-  calculateDeposit();
-}
-
-function initBanks() {
-  const bankSelect = document.getElementById("bankSelect");
-  const depositSelect = document.getElementById("depositSelect");
-  const termGroup = document.getElementById("termGroup");
-  const termSelect = document.getElementById("termSelect");
-  const currencyGroup = document.getElementById("currencyGroup");
-  const currencySelect = document.getElementById("depositCurrencySelect");
-
-  // Список банков
-  Object.keys(banksData).forEach(bank => {
-    const option = document.createElement("option");
-    option.value = bank;
-    option.textContent = bank;
-    bankSelect.appendChild(option);
-  });
-
-  // При выборе банка
-  bankSelect.addEventListener("change", () => {
-    depositSelect.innerHTML = '<option value="">-- Выберите депозит --</option>';
-    depositSelect.disabled = true;
-    termGroup.classList.remove("show");
-    currencyGroup.classList.remove("show");
-
-    const bank = bankSelect.value;
-    if (!bank) return;
-
-    banksData[bank].forEach((deposit, index) => {
-      const option = document.createElement("option");
-      option.value = index;
-      option.textContent = deposit.depositName;
-      depositSelect.appendChild(option);
-    });
-
-    depositSelect.disabled = false;
-  });
-
-  // При выборе депозита
-  depositSelect.addEventListener("change", () => {
-    const bank = bankSelect.value;
-    const depositIndex = depositSelect.value;
-    if (!bank || depositIndex === "") return;
-
-    const deposit = banksData[bank][depositIndex];
-    termSelect.innerHTML = "";
-
-    if (deposit.options && deposit.options.length > 0) {
-      deposit.options.forEach((opt, idx) => {
-        const option = document.createElement("option");
-        option.value = idx;
-        option.textContent = `${opt.term} мес.`;
-        termSelect.appendChild(option);
-      });
-
-      termGroup.style.display = "block";
-      setTimeout(() => termGroup.classList.add("show"), 50);
-
-      termSelect.value = 0;
-      updateCurrencyOptions(deposit, deposit.options[0]);
-    }
-  });
-
-  // При смене срока
-  termSelect.addEventListener("change", () => {
-    const bank = bankSelect.value;
-    const depositIndex = depositSelect.value;
-    if (!bank || depositIndex === "") return;
-    const deposit = banksData[bank][depositIndex];
-    const option = deposit.options[termSelect.value];
-    updateCurrencyOptions(deposit, option);
-  });
-
-  // При смене валюты
-  currencySelect.addEventListener("change", () => {
-    const bank = bankSelect.value;
-    const depositIndex = depositSelect.value;
-    if (!bank || depositIndex === "") return;
-    const deposit = banksData[bank][depositIndex];
-    const option = deposit.options[termSelect.value];
-    applyDepositOption(deposit, option, currencySelect.value);
-  });
-
-  // Обновление валют
-  function updateCurrencyOptions(deposit, option) {
-    currencySelect.innerHTML = "";
-    Object.entries(option.rates).forEach(([cur, rate]) => {
-      const optionEl = document.createElement("option");
-      optionEl.value = cur;
-      optionEl.textContent = `${cur} (${rate}%)`;
-      currencySelect.appendChild(optionEl);
-    });
-
-    currencyGroup.style.display = "block";
-    setTimeout(() => currencyGroup.classList.add("show"), 50);
-
-    applyDepositOption(deposit, option, Object.keys(option.rates)[0]);
-  }
-}
-
-window.addEventListener("DOMContentLoaded", initBanks);
 
 
 
-// === База банков с условиями ===
-const banksData = {
-  "АО МДО «Хумо»": [
-    {
-      depositName: "Сарчашма",
-      minAmount: { TJS: 10, RUB: 10, USD: 1 },
-      capitalization: true,
-      replenishment: true,
-      options: [
-        { term: 6,  rates: { TJS: 14, RUB: 9,  USD: 4 } },
-        { term: 12, rates: { TJS: 16, RUB: 10, USD: 5 } },
-        { term: 24, rates: { TJS: 18, RUB: 11, USD: 6 } }
-      ]
-    }
-  ],
-  "Амонатбанк": [
-    {
-      depositName: "Имруз",
-      minAmount: { TJS: 100 },
-      capitalization: true,
-      replenishment: false,
-      options: [
-        { term: 12, rates: { TJS: 15 } },
-        { term: 24, rates: { TJS: 16 } },
-        { term: 36, rates: { TJS: 17 } }
-      ]
-    }
-  ],
-  "Банк Эсхата": [
-    {
-      depositName: "Имконият",
-      minAmount: { TJS: 200, USD: 20 },
-      capitalization: true,
-      replenishment: true,
-      options: [
-        { term: 6,  rates: { TJS: 13, USD: 4 } },
-        { term: 12, rates: { TJS: 14, USD: 5 } },
-        { term: 24, rates: { TJS: 15, USD: 6 } }
-      ]
-    }
-  ],
-  "Ориёнбанк": [
-    {
-      depositName: "Боварӣ",
-      minAmount: { TJS: 100, RUB: 500 },
-      capitalization: false,
-      replenishment: true,
-      options: [
-        { term: 6,  rates: { TJS: 18, RUB: 8 } },
-        { term: 12, rates: { TJS: 19, RUB: 9 } },
-        { term: 24, rates: { TJS: 20, RUB: 10 } }
-      ]
-    }
-  ]
-};
 
 // === Функции выбора банка/депозита ===
 function applyDepositOption(deposit, option, selectedCurrency = null) {
