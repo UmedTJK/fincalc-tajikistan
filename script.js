@@ -1,3 +1,13 @@
+/**
+ * =====================================================
+ * FinCalc.TJ — Main Application Script
+ * Version: v0.4.4
+ *
+ * This file intentionally contains orchestration logic.
+ * Heavy logic is gradually extracted into /modules.
+ * =====================================================
+ */
+
 import { calculateMonthlyInterest } from './modules/interest.js';
 import { banksData } from './modules/banks.js';
 import { generateCSVReport } from './modules/export/csv.js';
@@ -9,6 +19,11 @@ import { exportToPDF as generatePDF } from './modules/export/pdf.js';
 
 
 
+// =====================================================
+// 1. Global State & Constants
+// =====================================================
+
+// calculations, shareData, chartInstance, etc.
 
 
 // Глобальные переменные
@@ -32,6 +47,8 @@ function formatDate(date) {
     const year = date.getFullYear();
     return `${day}.${month}.${year}`;
 }
+
+
 
 // Инициализация капитализации
 function initCapitalization() {
