@@ -8,6 +8,9 @@
  * =====================================================
  */
 
+// =====================================================
+// 1. IMPORTS
+// =====================================================
 import { calculateMonthlyInterest } from './modules/interest.js';
 import { banksData } from './modules/banks.js';
 import { generateCSVReport } from './modules/export/csv.js';
@@ -26,41 +29,24 @@ import {
   shareToSocial
 } from './modules/ui/share.js';
 
-
-
-
-
 // =====================================================
-// 1. Global State & Constants
+// 2. GLOBAL STATE & CONSTANTS
 // =====================================================
-
-// calculations, shareData, chartInstance, etc.
-
-
-// Глобальные переменные
 let calculations = [];
 let capitalizationType = 'none';
 let capitalizationFrequency = 'monthly';
 
-
 // =====================================================
-// 2. UTILITY & HELPER FUNCTIONS
-// -----------------------------------------------------
-// Чистые вспомогательные функции:
-// - форматирование чисел
-// - работа с датами
-// Не имеют побочных эффектов
+// 3. DOM HELPERS & INITIALIZATION HELPERS
 // =====================================================
 
-
-
-
-// Инициализация капитализации
+/**
+ * Инициализация выбора капитализации
+ */
 function initCapitalization() {
     const capitalizationSelect = document.getElementById('capitalizationType');
     if (!capitalizationSelect) return;
     
-    // Обработчик изменения типа капитализации
     capitalizationSelect.addEventListener('change', function() {
         capitalizationType = this.value;
         calculateDeposit();
@@ -68,15 +54,12 @@ function initCapitalization() {
 }
 
 // =====================================================
-// 3. CORE CALCULATION LOGIC
-// -----------------------------------------------------
-// Бизнес-логика расчёта депозита:
-// - помесячные расчёты
-// - капитализация
-// - сценарии сравнения
+// 4. CORE CALCULATION LOGIC
 // =====================================================
 
-// Расчет с учетом капитализации
+/**
+ * Расчет с учетом капитализации (основная логика)
+ */
 function calculateWithCapitalization() {
     const initialDeposit = parseFloat(document.getElementById('initialDeposit').value) || 0;
     const annualRate = (parseFloat(document.getElementById('annualRate').value) || 0) / 100;
@@ -85,8 +68,8 @@ function calculateWithCapitalization() {
     const termMonths = parseInt(document.getElementById('termMonths').value) || 1;
     const startDate = new Date(document.getElementById('startDate').value || new Date().toISOString().split('T')[0]);
     
-    const grossAnnualRate = annualRate; // Ставка до вычета налогов
-    const netAnnualRate = annualRate * (1 - taxRate); // Ставка после вычета налогов
+    const grossAnnualRate = annualRate;
+    const netAnnualRate = annualRate * (1 - taxRate);
     
     calculations = [];
     let currentAmount = initialDeposit;
@@ -95,40 +78,32 @@ function calculateWithCapitalization() {
     let totalCapitalized = 0;
 
     for (let month = 1; month <= termMonths; month++) {
-        // Расчет даты для каждого месяца
         const monthDate = new Date(startDate);
         monthDate.setMonth(startDate.getMonth() + month - 1);
         const formattedDate = formatDate(monthDate);
         
-        // Расчет процентов и налога (interest.js)
         const { gross, tax, net } = calculateMonthlyInterest(
           currentAmount,
           grossAnnualRate,
           taxRate
         );
-
         
-        // Сумма капитализации (зависит от типа)
         let capitalizedAmount = 0;
         let endAmount = currentAmount;
         
         switch (capitalizationType) {
             case 'auto':
-                // Автоматическая: все проценты капитализируются
                 capitalizedAmount = net;
                 endAmount = currentAmount + capitalizedAmount + monthlyContribution;
                 break;
                 
             case 'manual':
-                // Ручная: пользователь решает капитализировать или нет
-                // Для простоты предположим, что пользователь капитализирует все
                 capitalizedAmount = net;
                 endAmount = currentAmount + capitalizedAmount + monthlyContribution;
                 break;
                 
             case 'none':
             default:
-                // Без капитализации: проценты не капитализируются
                 capitalizedAmount = 0;
                 endAmount = currentAmount + monthlyContribution;
                 break;
@@ -147,7 +122,6 @@ function calculateWithCapitalization() {
             capitalizationType: capitalizationType
         });
 
-
         currentAmount = endAmount;
         totalInterest += gross;
         totalTax += tax;
@@ -162,18 +136,9 @@ function calculateWithCapitalization() {
     };
 }
 
-// [МОДУЛЬ: Сравнение сценариев капитализации]
-function calculateAllCapitalizationScenarios() {
-    const scenarios = {
-        'Без капитализации': calculateScenario('none'),
-        'Ручная капитализация': calculateScenario('manual'),
-        'Автоматическая капитализация': calculateScenario('auto')
-    };
-
-    return buildComparisonSeries(scenarios);
-}
-
-// Расчет одного сценария (временная замена глобальной capitalizationType)
+/**
+ * Расчет одного сценария капитализации
+ */
 function calculateScenario(type) {
     const previousType = capitalizationType;
     const tempCalculations = [];
@@ -233,28 +198,32 @@ function calculateScenario(type) {
         currentAmount = endAmount;
     }
 
-    // ВОССТАНАВЛИВАЕМ предыдущий тип
     capitalizationType = previousType;
     
     return tempCalculations;
 }
 
+/**
+ * Расчет всех сценариев капитализации для сравнения
+ */
+function calculateAllCapitalizationScenarios() {
+    const scenarios = {
+        'Без капитализации': calculateScenario('none'),
+        'Ручная капитализация': calculateScenario('manual'),
+        'Автоматическая капитализация': calculateScenario('auto')
+    };
 
-
-
+    return buildComparisonSeries(scenarios);
+}
 
 // =====================================================
-// 4. UI RENDERING & DOM UPDATES
-// -----------------------------------------------------
-// Отвечает за отображение данных:
-// - таблица расчетов
-// - графики Chart.js
-// - визуальные обновления
+// 5. UI ORCHESTRATION (ЦЕНТРАЛЬНАЯ ТОЧКА)
 // =====================================================
 
-
-
-// Основная функция расчета
+/**
+ * Основная функция расчета и обновления UI
+ * ЕДИНСТВЕННАЯ точка, где вызываются расчёты и обновляется UI
+ */
 function calculateDeposit() {
     // Получаем значения из полей ввода
     const initialDeposit = parseFloat(document.getElementById('initialDeposit').value) || 0;
@@ -273,7 +242,7 @@ function calculateDeposit() {
     document.getElementById('netMonthlyRate').textContent = (netMonthlyRate * 100).toFixed(4) + '%';
     document.getElementById('monthlyIncome').textContent = formatNumber(monthlyIncome);
 
-    // Расчет по месяцам (ОДИН раз вызываем функцию!)
+    // Расчет по месяцам
     const result = calculateWithCapitalization();
     let finalAmount = result.finalAmount;
     let totalInterest = result.totalInterest;
@@ -287,45 +256,37 @@ function calculateDeposit() {
     document.getElementById('totalInterest').textContent = formatNumber(totalInterest);
     document.getElementById('finalAmount').textContent = formatNumber(finalAmount);
 
-// Обновляем таблицу
-renderCalculationsTable(calculations, formatNumber);
+    // Обновляем таблицу
+    renderCalculationsTable(calculations, formatNumber);
 
-// 🧷 Контроль: расчёты
-console.assert(
-  Array.isArray(calculations) && calculations.length > 0,
-  '[FinCalc] calculations пуст — таблица не получит данные'
-);
+    // Контроль: расчёты
+    console.assert(
+      Array.isArray(calculations) && calculations.length > 0,
+      '[FinCalc] calculations пуст — таблица не получит данные'
+    );
 
-// Готовим данные для графика
-const chartData = calculateAllCapitalizationScenarios();
+    // Готовим данные для графика
+    const chartData = calculateAllCapitalizationScenarios();
 
-// 🧷 Контроль: данные для графика
-console.assert(
-  chartData &&
-  Array.isArray(chartData.labels) &&
-  Object.keys(chartData.series || {}).length > 0,
-  '[FinCalc] chartData некорректен — график не получит данные'
-);
+    // Контроль: данные для графика
+    console.assert(
+      chartData &&
+      Array.isArray(chartData.labels) &&
+      Object.keys(chartData.series || {}).length > 0,
+      '[FinCalc] chartData некорректен — график не получит данные'
+    );
 
-// Обновляем график
-updateChart(chartData);
-
-    
-} // ← ВОТ ЭТОГО НЕ ХВАТАЛО
-
-    
-
-
+    // Обновляем график
+    updateChart(chartData);
+}
 
 // =====================================================
-// 5. EXPORT LOGIC (CSV / PDF)
-// -----------------------------------------------------
-// Экспорт результатов расчёта:
-// - CSV (Excel)
-// - PDF (печать / сохранение)
+// 6. EXPORT LOGIC
 // =====================================================
 
-// Экспорт в Excel (CSV)
+/**
+ * Экспорт в Excel (CSV)
+ */
 function exportToExcel() {
   const initialDeposit = parseFloat(document.getElementById('initialDeposit').value) || 0;
   const annualRate = parseFloat(document.getElementById('annualRate').value) || 0;
@@ -356,8 +317,9 @@ function exportToExcel() {
   document.body.removeChild(link);
 }
 
-
-// Экспорт в PDF
+/**
+ * Экспорт в PDF
+ */
 function exportToPDF() {
   const printWindow = window.open('', '_blank');
 
@@ -387,36 +349,13 @@ function exportToPDF() {
   }, 500);
 }
 
-
-
-
 // =====================================================
-// 6. SHARE LOGIC
-// -----------------------------------------------------
-// Поделиться результатами расчёта:
-// - Web Share API
-// - fallback (clipboard)
-// - модальное окно и варианты шаринга
+// 7. BANK / DEPOSIT SELECTION LOGIC
 // =====================================================
 
-// [МОДУЛЬ: Улучшенный функционал поделиться]
-// Назначение: Расширенный функционал для分享 результатов
-// 📍 РАЗМЕСТИТЕ: После предыдущей функции shareCalculation
-
-
-
-
-
-// =====================================================
-// 8. APP INITIALIZATION & EVENT LISTENERS
-// -----------------------------------------------------
-// Запуск приложения:
-// - подписка на события
-// - инициализация модулей
-// - первичный расчет
-// =====================================================
-
-// === Функции выбора банка/депозита ===
+/**
+ * Применение выбранного депозита к форме
+ */
 function applyDepositOption(deposit, option, selectedCurrency = null) {
   const currency = selectedCurrency || Object.keys(option.rates)[0];
   if (!option.rates[currency]) return;
@@ -430,6 +369,9 @@ function applyDepositOption(deposit, option, selectedCurrency = null) {
   calculateDeposit();
 }
 
+/**
+ * Инициализация выбора банков и депозитов
+ */
 function initBanks() {
   const bankSelect = document.getElementById("bankSelect");
   const depositSelect = document.getElementById("depositSelect");
@@ -524,7 +466,13 @@ function initBanks() {
   }
 }
 
-// Инициализация при загрузке страницы (ОДИН обработчик!)
+// =====================================================
+// 8. APP BOOTSTRAP
+// =====================================================
+
+/**
+ * Инициализация приложения при загрузке страницы
+ */
 document.addEventListener('DOMContentLoaded', function() {
   // Инициализация модулей
   initBanks();
@@ -546,7 +494,7 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('exportPdfBtn').addEventListener('click', exportToPDF);
   document.getElementById('screenshotBtn').addEventListener('click', takeChartScreenshot);
   
-  // 🔥 ФИКС: Только один обработчик для кнопки "Поделиться"
+  // Обработчик для кнопки "Поделиться"
   document.getElementById('shareBtn').addEventListener('click', showShareOptions);
   
   // Добавляем обработчики для кнопок выбора способа шаринга
@@ -558,7 +506,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 shareAsText(); 
                 break;
             case 'image': 
-                shareAsImage(takeChartScreenshot); // 🔥 ФИКС: передаем функцию
+                shareAsImage(takeChartScreenshot);
                 break;
             case 'social': 
                 shareToSocial(); 
