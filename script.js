@@ -1,7 +1,7 @@
 /**
  * =====================================================
  * FinCalc.TJ — Main Application Script
- * Version: v0.4.4
+ * Version: v0.4.5 (FIXED)
  *
  * This file intentionally contains orchestration logic.
  * Heavy logic is gradually extracted into /modules.
@@ -14,8 +14,17 @@ import { generateCSVReport } from './modules/export/csv.js';
 import { buildTimeSeries, buildComparisonSeries } from './modules/charts.js';
 import { exportToPDF as generatePDF } from './modules/export/pdf.js';
 import { formatNumber, formatDate } from './modules/utils/format.js';
-
-
+import { renderCalculationsTable } from './modules/ui/table.js';
+import { initChart, updateChart, takeChartScreenshot } from './modules/ui/chart-ui.js';
+import { initThemeSwitcher } from './modules/ui/themes.js';
+import {
+  shareCalculation,
+  showShareOptions,
+  hideShareOptions,
+  shareAsText,
+  shareAsImage,
+  shareToSocial
+} from './modules/ui/share.js';
 
 
 
@@ -30,7 +39,6 @@ import { formatNumber, formatDate } from './modules/utils/format.js';
 
 // Глобальные переменные
 let calculations = [];
-let depositChart = null;
 let capitalizationType = 'none';
 let capitalizationFrequency = 'monthly';
 
@@ -165,6 +173,72 @@ function calculateAllCapitalizationScenarios() {
     return buildComparisonSeries(scenarios);
 }
 
+// Расчет одного сценария (временная замена глобальной capitalizationType)
+function calculateScenario(type) {
+    const previousType = capitalizationType;
+    const tempCalculations = [];
+    
+    const initialDeposit = parseFloat(document.getElementById('initialDeposit').value) || 0;
+    const annualRate = (parseFloat(document.getElementById('annualRate').value) || 0) / 100;
+    const taxRate = (parseFloat(document.getElementById('taxRate').value) || 0) / 100;
+    const monthlyContribution = parseFloat(document.getElementById('monthlyContribution').value) || 0;
+    const termMonths = parseInt(document.getElementById('termMonths').value) || 1;
+    const startDate = new Date(document.getElementById('startDate').value || new Date().toISOString().split('T')[0]);
+    
+    const grossAnnualRate = annualRate;
+    const netAnnualRate = annualRate * (1 - taxRate);
+    
+    let currentAmount = initialDeposit;
+
+    for (let month = 1; month <= termMonths; month++) {
+        const monthDate = new Date(startDate);
+        monthDate.setMonth(startDate.getMonth() + month - 1);
+        const formattedDate = formatDate(monthDate);
+        
+        const { gross, tax, net } = calculateMonthlyInterest(
+            currentAmount,
+            grossAnnualRate,
+            taxRate
+        );
+        
+        let capitalizedAmount = 0;
+        let endAmount = currentAmount;
+        
+        switch (type) {
+            case 'auto':
+            case 'manual':
+                capitalizedAmount = net;
+                endAmount = currentAmount + capitalizedAmount + monthlyContribution;
+                break;
+            case 'none':
+            default:
+                capitalizedAmount = 0;
+                endAmount = currentAmount + monthlyContribution;
+                break;
+        }
+        
+        tempCalculations.push({
+            month: month,
+            date: formattedDate,
+            startAmount: currentAmount,
+            interestEarned: gross,
+            taxAmount: tax,
+            netInterest: net,
+            capitalizedAmount: capitalizedAmount,
+            monthlyContribution: monthlyContribution,
+            endAmount: endAmount,
+            capitalizationType: type
+        });
+
+        currentAmount = endAmount;
+    }
+
+    // ВОССТАНАВЛИВАЕМ предыдущий тип
+    capitalizationType = previousType;
+    
+    return tempCalculations;
+}
+
 
 
 
@@ -178,31 +252,7 @@ function calculateAllCapitalizationScenarios() {
 // - визуальные обновления
 // =====================================================
 
-// Обновление таблицы с расчетами
-function updateTable() {
-    const tbody = document.getElementById('calculationsBody');
-    tbody.innerHTML = '';
 
-    calculations.forEach((calc) => {
-        const row = tbody.insertRow();
-        
-        // Определяем иконку в зависимости от типа капитализации
-        let icon = '💳'; // по умолчанию (без капитализации)
-        if (calc.capitalizationType === 'auto') icon = '⚡';
-        if (calc.capitalizationType === 'manual') icon = '👐';
-        
-        row.innerHTML = `
-            <td style="text-align: center; font-weight: 600;">${calc.month}</td>
-            <td style="text-align: center;">${calc.date}</td>
-            <td>${formatNumber(calc.startAmount)} </td>
-            <td class="interest-cell">${formatNumber(calc.interestEarned)} </td>
-            <td class="tax-cell" style="color: #dc3545;">-${formatNumber(calc.taxAmount)}</td>
-            <td class="capitalization-cell" style="color: #28a745;">${icon} ${formatNumber(calc.capitalizedAmount)} </td>
-            <td class="contribution-cell">+${formatNumber(calc.monthlyContribution)}</td>
-            <td class="amount-cell" style="font-weight: 700;">${formatNumber(calc.endAmount)} </td>
-        `;
-    });
-}
 
 // Основная функция расчета
 function calculateDeposit() {
@@ -237,13 +287,22 @@ function calculateDeposit() {
     document.getElementById('totalInterest').textContent = formatNumber(totalInterest);
     document.getElementById('finalAmount').textContent = formatNumber(finalAmount);
 
-    // Можно также отобразить эти итоги где-то в интерфейсе
-    console.log("Общий налог:", totalTax);
-    console.log("Общая капитализация:", totalCapitalized);
-
     // Обновляем таблицу и график
-    updateTable();
-    updateChart();
+    renderCalculationsTable(calculations, formatNumber);
+    const chartData = calculateAllCapitalizationScenarios();
+    updateChart(chartData);
+    
+    // 🔥 ФИКС: Обновляем данные для шаринга
+    shareCalculation({
+        initialDeposit,
+        annualRate: annualRate * 100,
+        taxRate: taxRate * 100,
+        monthlyContribution,
+        termMonths,
+        finalAmount,
+        totalInterest,
+        formatNumber
+    });
 }
 
 
@@ -319,307 +378,6 @@ function exportToPDF() {
 }
 
 
-// [МОДУЛЬ: Графики Chart.js]
-// Инициализация графика
-function initChart() {
-    const ctx = document.getElementById('depositChart').getContext('2d');
-    
-    depositChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: [],
-            datasets: [
-                {
-                    label: 'Без капитализации',
-                    data: [],
-                    borderColor: '#dc3545',
-                    backgroundColor: 'rgba(220, 53, 69, 0.1)',
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.4
-                },
-                {
-                    label: 'Ручная капитализация',
-                    data: [],
-                    borderColor: '#fd7e14',
-                    backgroundColor: 'rgba(253, 126, 20, 0.1)',
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.4
-                },
-                {
-                    label: 'Автоматическая капитализация',
-                    data: [],
-                    borderColor: '#28a745',
-                    backgroundColor: 'rgba(40, 167, 69, 0.1)',
-                    borderWidth: 3,
-                    fill: true,
-                    tension: 0.4
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'Сравнение типов капитализации',
-                    font: { size: 16, weight: 'bold' }
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return context.dataset.label + ': ' + formatNumber(context.raw) + ' TJS';
-                        }
-                    }
-                },
-                legend: {
-                    position: 'top',
-                    labels: {
-                        usePointStyle: true,
-                        padding: 20
-                    }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Сумма депозита (TJS)'
-                    },
-                    ticks: {
-                        callback: function(value) {
-                            return formatNumber(value) + ' TJS';
-                        }
-                    }
-                },
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Месяцы'
-                    },
-                    ticks: {
-                        maxTicksLimit: 12
-                    }
-                }
-            }
-        }
-    });
-}
-
-// Обновление данных графика
-function updateChart() {
-    if (!depositChart) return;
-
-    const result = calculateAllCapitalizationScenarios();
-
-    // Метки по оси X (даты)
-    depositChart.data.labels = result.labels;
-
-    // Данные для линий
-    depositChart.data.datasets[0].data =
-        result.series['Без капитализации'] || [];
-
-    depositChart.data.datasets[1].data =
-        result.series['Ручная капитализация'] || [];
-
-    depositChart.data.datasets[2].data =
-        result.series['Автоматическая капитализация'] || [];
-
-    depositChart.update();
-}
-
-
-// Функция для скриншота графика (для YouTube)
-function takeChartScreenshot() {
-    if (!depositChart) return;
-    
-    const chartCanvas = document.getElementById('depositChart');
-    const image = chartCanvas.toDataURL('image/png');
-    
-    // Создаем временную ссылку для скачивания
-    const link = document.createElement('a');
-    link.download = 'график-депозита-' + new Date().toLocaleDateString() + '.png';
-    link.href = image;
-    link.click();
-}
-
-
-
-// =====================================================
-// 7. THEME & UI CONFIGURATION
-// -----------------------------------------------------
-// Управление оформлением интерфейса:
-// - темы оформления
-// - сохранение выбора в LocalStorage
-// =====================================================
-
-// [МОДУЛЬ: Переключатель тем]
-// Назначение: Управление различными темами оформления
-// Логика: Сохранение выбранной темы в LocalStorage
-
-const themes = {
-    'default': {
-        body: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        container: 'white'
-    },
-    'dark-gradient': {
-        body: 'linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%)',
-        container: 'rgba(18, 18, 18, 0.95)',
-        text: '#ffffff'
-    },
-    'futuristic': {
-        body: 'linear-gradient(135deg, #000428 0%, #004e92 100%)',
-        container: 'rgba(255, 255, 255, 0.95)'
-    },
-    'glass': {
-        body: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        container: 'rgba(255, 255, 255, 0.95)',
-        backdrop: 'blur(20px)'
-    },
-    'premium': {
-        body: 'linear-gradient(135deg, #1a2a6c 0%, #b21f1f 50%, #fdbb2d 100%)',
-        container: 'rgba(255, 255, 255, 0.98)'
-    }
-};
-
-function initThemeSwitcher() {
-    const themeBtns = document.querySelectorAll('.theme-btn');
-    const savedTheme = localStorage.getItem('selectedTheme') || 'default';
-    
-    // Применяем сохраненную тему
-    applyTheme(savedTheme);
-    
-    // Добавляем обработчики для кнопок
-    themeBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const theme = this.getAttribute('data-theme');
-            applyTheme(theme);
-            localStorage.setItem('selectedTheme', theme);
-            
-            // Обновляем активную кнопку
-            themeBtns.forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-        });
-        
-        // Помечаем активную тему
-        if (btn.getAttribute('data-theme') === savedTheme) {
-            btn.classList.add('active');
-        }
-    });
-}
-
-function applyTheme(themeName) {
-    const theme = themes[themeName];
-    const body = document.body;
-    const container = document.querySelector('.container');
-    
-    // Применяем стили
-    body.style.background = theme.body;
-    container.style.background = theme.container;
-    
-    if (theme.backdrop) {
-        container.style.backdropFilter = theme.backdrop;
-    }
-    
-    if (theme.text) {
-        container.style.color = theme.text;
-    }
-    
-    // Дополнительные стили для конкретных тем
-    if (themeName === 'dark-gradient' || themeName === 'futuristic') {
-        container.style.border = '1px solid rgba(255, 255, 255, 0.1)';
-        container.style.color = theme.text || '#333';
-    } else {
-        container.style.border = 'none';
-        container.style.color = '#333';
-    }
-}
-
-// [МОДУЛЬ: Поделиться расчетом]
-// Назначение: Позволяет пользователю поделиться результатами расчета через Web Share API
-// Вход: Данные текущего расчета
-// Возвращает: Ничего (открывает нативный диалог поделиться)
-// 📍 РАЗМЕСТИТЕ: После функций экспорта, перед инициализацией
-
-function shareCalculation() {
-    const initialDeposit = parseFloat(document.getElementById('initialDeposit').value) || 0;
-    const annualRate = parseFloat(document.getElementById('annualRate').value) || 0;
-    const termMonths = parseInt(document.getElementById('termMonths').value) || 1;
-    const finalAmount = calculations.length > 0 ? calculations[calculations.length - 1].endAmount : 0;
-    
-    const shareText = `💰 Результат расчета депозита:
-• Начальная сумма: ${formatNumber(initialDeposit)} TJS
-• Годовая ставка: ${annualRate}%
-• Срок: ${termMonths} месяцев
-• Итоговая сумма: ${formatNumber(finalAmount)} TJS
-
-Рассчитано на FinCalc.TJ - калькуляторе депозитов для Таджикистана`;
-
-    // Проверяем поддержку Web Share API
-    if (navigator.share) {
-        navigator.share({
-            title: 'Расчет депозита - FinCalc.TJ',
-            text: shareText,
-            url: window.location.href
-        })
-        .then(() => console.log('Успешно поделились'))
-        .catch((error) => {
-            // Если пользователь отменил шаринг или произошла ошибка,
-            // предлагаем альтернативный способ
-            fallbackShare(shareText);
-        });
-    } else {
-        // Fallback для браузеров без поддержки Web Share API
-        fallbackShare(shareText);
-    }
-}
-
-// Альтернативный способ поделиться (копирование в буфер обмена)
-function fallbackShare(text) {
-    // Копируем текст в буфер обмена
-    navigator.clipboard.writeText(text)
-        .then(() => {
-            // Показываем уведомление об успешном копировании
-            showNotification('✅ Текст расчета скопирован в буфер обмена! Вставьте его в сообщение.');
-        })
-        .catch(err => {
-            // Если не удалось скопировать, показываем текст для ручного копирования
-            alert('📋 Скопируйте текст для分享:\n\n' + text);
-        });
-}
-
-// Функция показа уведомления
-function showNotification(message) {
-    // Создаем элемент уведомления
-    const notification = document.createElement('div');
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: #10b981;
-        color: white;
-        padding: 16px 24px;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        z-index: 10000;
-        font-weight: 500;
-        max-width: 300px;
-    `;
-    notification.textContent = message;
-    
-    document.body.appendChild(notification);
-    
-    // Автоматически скрываем через 3 секунды
-    setTimeout(() => {
-        notification.style.opacity = '0';
-        notification.style.transition = 'opacity 0.5s ease';
-        setTimeout(() => notification.remove(), 500);
-    }, 3000);
-}
-
 
 
 // =====================================================
@@ -635,96 +393,8 @@ function showNotification(message) {
 // Назначение: Расширенный функционал для分享 результатов
 // 📍 РАЗМЕСТИТЕ: После предыдущей функции shareCalculation
 
-// ⚠️ Global state (share flow)
-let shareData = null;
 
-function prepareShareData() {
-    const initialDeposit = parseFloat(document.getElementById('initialDeposit').value) || 0;
-    const annualRate = parseFloat(document.getElementById('annualRate').value) || 0;
-    const taxRate = parseFloat(document.getElementById('taxRate').value) || 0;
-    const monthlyContribution = parseFloat(document.getElementById('monthlyContribution').value) || 0;
-    const termMonths = parseInt(document.getElementById('termMonths').value) || 1;
-    const finalAmount = calculations.length > 0 ? calculations[calculations.length - 1].endAmount : 0;
-    const totalInterest = finalAmount - (initialDeposit + monthlyContribution * termMonths);
-    
-    shareData = {
-        initialDeposit,
-        annualRate,
-        taxRate,
-        monthlyContribution,
-        termMonths,
-        finalAmount,
-        totalInterest,
-        url: window.location.href,
-        timestamp: new Date().toLocaleString('ru-RU')
-    };
-    
-    return shareData;
-}
 
-function showShareOptions() {
-    prepareShareData();
-    document.getElementById('shareOptions').style.display = 'flex';
-}
-
-function hideShareOptions() {
-    document.getElementById('shareOptions').style.display = 'none';
-}
-
-function shareAsText() {
-    const text = `💰 РАСЧЕТ ДЕПОЗИТА - FinCalc.TJ
-
-📊 Параметры:
-• Начальная сумма: ${formatNumber(shareData.initialDeposit)} TJS
-• Годовая ставка: ${shareData.annualRate}%
-• Налог: ${shareData.taxRate}%
-• Пополнение: ${formatNumber(shareData.monthlyContribution)} TJS/мес
-• Срок: ${shareData.termMonths} месяцев
-
-📈 Результаты:
-• Итоговая сумма: ${formatNumber(shareData.finalAmount)} TJS
-• Общий доход: ${formatNumber(shareData.totalInterest)} TJS
-• Дата расчета: ${shareData.timestamp}
-
-🔗 ${shareData.url}
-
-#финансы #Таджикистан #депозит #инвестиции`;
-
-    if (navigator.share) {
-        navigator.share({
-            title: 'Мой расчет депозита - FinCalc.TJ',
-            text: text,
-            url: shareData.url
-        });
-    } else {
-        navigator.clipboard.writeText(text).then(() => {
-            showNotification('✅ Текст скопирован! Вставьте в сообщение');
-            hideShareOptions();
-        });
-    }
-}
-
-function shareAsImage() {
-    takeChartScreenshot();
-    hideShareOptions();
-    showNotification('📸 Скриншот графика сохранен!');
-}
-
-function shareToSocial() {
-    const text = encodeURIComponent('Посмотрите мой расчет депозита на FinCalc.TJ!');
-    const url = encodeURIComponent(shareData.url);
-    
-    const socialLinks = {
-        telegram: `https://t.me/share/url?url=${url}&text=${text}`,
-        whatsapp: `https://wa.me/?text=${text}%20${url}`,
-        vk: `https://vk.com/share.php?url=${url}&title=${text}`,
-        twitter: `https://twitter.com/intent/tweet?text=${text}&url=${url}`
-    };
-    
-    // Можно открыть окно выбора соцсетей
-    window.open(socialLinks.telegram, '_blank');
-    hideShareOptions();
-}
 
 
 // =====================================================
@@ -735,74 +405,6 @@ function shareToSocial() {
 // - инициализация модулей
 // - первичный расчет
 // =====================================================
-
-// Обновляем обработчики
-document.addEventListener('DOMContentLoaded', function() {
-    // Заменяем старый обработчик на новый
-    document.getElementById('shareBtn').addEventListener('click', showShareOptions);
-    
-    // Добавляем обработчики для кнопок выбора
-    document.querySelectorAll('.share-option-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const type = this.getAttribute('data-type');
-            switch(type) {
-                case 'text': shareAsText(); break;
-                case 'image': shareAsImage(); break;
-                case 'social': shareToSocial(); break;
-            }
-        });
-    });
-    
-    // Закрытие по клику вне модального окна
-    document.getElementById('shareOptions').addEventListener('click', function(e) {
-        if (e.target === this) hideShareOptions();
-    });
-    
-    // Закрытие по ESC
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') hideShareOptions();
-    });
-});
-
-// Инициализация при загрузке страницы
-document.addEventListener('DOMContentLoaded', function() {
-    // Добавляем обработчики событий для всех полей ввода
-    const inputs = ['initialDeposit', 'annualRate', 'taxRate', 'monthlyContribution', 'termMonths', 'startDate'];
-    inputs.forEach(id => {
-        document.getElementById(id).addEventListener('input', calculateDeposit);
-    });
-    
-    // Добавляем обработчик для выбора капитализации
-    document.getElementById('capitalizationType').addEventListener('change', calculateDeposit);
-    
-    // Добавляем обработчики для кнопок экспорта
-    document.getElementById('exportBtn').addEventListener('click', exportToExcel);
-    document.getElementById('exportPdfBtn').addEventListener('click', exportToPDF);
-    document.getElementById('screenshotBtn').addEventListener('click', takeChartScreenshot);
-    
-    
-    // Инициализируем переключатель тем
-    initThemeSwitcher();
-
-    
-
-
-    // Добавляем обработчик для кнопки "Поделиться"
-    document.getElementById('shareBtn').addEventListener('click', shareCalculation);
-    
-    
-    // Инициализируем график и капитализацию
-    initChart();
-    initCapitalization();
-    
-    // Первоначальный расчет
-    calculateDeposit();
-});
-
-
-
-
-
 
 // === Функции выбора банка/депозита ===
 function applyDepositOption(deposit, option, selectedCurrency = null) {
@@ -912,18 +514,59 @@ function initBanks() {
   }
 }
 
-window.addEventListener("DOMContentLoaded", initBanks);
+// Инициализация при загрузке страницы (ОДИН обработчик!)
+document.addEventListener('DOMContentLoaded', function() {
+  // Инициализация модулей
+  initBanks();
+  initThemeSwitcher();
+  initChart(formatNumber);
+  initCapitalization();
 
-function calculateScenario(type) {
-    const previousType = capitalizationType;
+  // Добавляем обработчики событий для всех полей ввода
+  const inputs = ['initialDeposit', 'annualRate', 'taxRate', 'monthlyContribution', 'termMonths', 'startDate'];
+  inputs.forEach(id => {
+    document.getElementById(id).addEventListener('input', calculateDeposit);
+  });
+  
+  // Добавляем обработчик для выбора капитализации
+  document.getElementById('capitalizationType').addEventListener('change', calculateDeposit);
+  
+  // Добавляем обработчики для кнопок экспорта
+  document.getElementById('exportBtn').addEventListener('click', exportToExcel);
+  document.getElementById('exportPdfBtn').addEventListener('click', exportToPDF);
+  document.getElementById('screenshotBtn').addEventListener('click', takeChartScreenshot);
+  
+  // 🔥 ФИКС: Только один обработчик для кнопки "Поделиться"
+  document.getElementById('shareBtn').addEventListener('click', showShareOptions);
+  
+  // Добавляем обработчики для кнопок выбора способа шаринга
+  document.querySelectorAll('.share-option-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const type = this.getAttribute('data-type');
+        switch(type) {
+            case 'text': 
+                shareAsText(); 
+                break;
+            case 'image': 
+                shareAsImage(takeChartScreenshot); // 🔥 ФИКС: передаем функцию
+                break;
+            case 'social': 
+                shareToSocial(); 
+                break;
+        }
+    });
+  });
+  
+  // Закрытие по клику вне модального окна
+  document.getElementById('shareOptions').addEventListener('click', function(e) {
+      if (e.target === this) hideShareOptions();
+  });
+  
+  // Закрытие по ESC
+  document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') hideShareOptions();
+  });
 
-    capitalizationType = type;
-    calculateWithCapitalization(); // пересчитывает глобальный `calculations`
-
-    const scenarioCalculations = [...calculations]; // КОПИЯ!
-
-    capitalizationType = previousType;
-
-    return scenarioCalculations;
-}
-
+  // Первоначальный расчет
+  calculateDeposit();
+});
