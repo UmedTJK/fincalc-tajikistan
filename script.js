@@ -2,6 +2,10 @@ import { calculateMonthlyInterest } from './modules/interest.js';
 import { banksData } from './modules/banks.js';
 import { generateCSVReport } from './modules/export/csv.js';
 import { buildTimeSeries, buildComparisonSeries } from './modules/charts.js';
+import { exportToPDF as generatePDF } from './modules/export/pdf.js';
+
+
+
 
 
 
@@ -244,132 +248,34 @@ function exportToExcel() {
 
 // Экспорт в PDF
 function exportToPDF() {
-    // Создаем новое окно для печати
-    const printWindow = window.open('', '_blank');
-    
-    // Получаем данные для отчета
-    const initialDeposit = parseFloat(document.getElementById('initialDeposit').value) || 0;
-    const annualRate = parseFloat(document.getElementById('annualRate').value) || 0;
-    const taxRate = parseFloat(document.getElementById('taxRate').value) || 0;
-    const monthlyContribution = parseFloat(document.getElementById('monthlyContribution').value) || 0;
-    const termMonths = parseInt(document.getElementById('termMonths').value) || 1;
-    
-    const netAnnualRate = (annualRate / 100) * (1 - (taxRate / 100));
-    const netMonthlyRate = netAnnualRate / 12;
-    const monthlyIncome = initialDeposit * netMonthlyRate;
-    
-    const totalContributions = initialDeposit + (monthlyContribution * termMonths);
-    const finalAmount = calculations.length > 0 ? calculations[calculations.length - 1].endAmount : 0;
-    const totalInterest = finalAmount - totalContributions;
+  const printWindow = window.open('', '_blank');
 
-    // Создаем HTML содержимое для PDF
-    const pdfContent = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Расчет депозита - ${new Date().toLocaleDateString()}</title>
-            <style>
-                body { font-family: Arial, sans-serif; margin: 40px; }
-                .header { text-align: center; margin-bottom: 30px; }
-                .section { margin-bottom: 25px; }
-                .section h2 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 5px; }
-                table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-                th, td { padding: 10px; text-align: right; border: 1px solid #ddd; }
-                th { background-color: #f8f9fa; font-weight: bold; }
-                th:first-child, td:first-child { text-align: center; }
-                .highlight { background-color: #fff3cd; font-weight: bold; }
-                .footer { margin-top: 40px; text-align: center; font-style: italic; color: #666; }
-                @media print {
-                    body { margin: 20px; }
-                    .no-print { display: none; }
-                }
-            </style>
-        </head>
-        <body>
-            <div class="header">
-                <h1>Калькулятор депозита</h1>
-                <p>Отчет создан: ${new Date().toLocaleString()}</p>
-            </div>
+  const initialDeposit = parseFloat(document.getElementById('initialDeposit').value) || 0;
+  const annualRate = parseFloat(document.getElementById('annualRate').value) || 0;
+  const taxRate = parseFloat(document.getElementById('taxRate').value) || 0;
+  const monthlyContribution = parseFloat(document.getElementById('monthlyContribution').value) || 0;
+  const termMonths = parseInt(document.getElementById('termMonths').value) || 1;
 
-            <div class="section">
-                <h2>Входные данные</h2>
-                <table>
-                    <tr><th>Параметр</th><th>Значение</th></tr>
-                    <tr><td>Начальная сумма депозита</td><td>${formatNumber(initialDeposit)} TJS</td></tr>
-                    <tr><td>Годовая ставка</td><td>${annualRate}%</td></tr>
-                    <tr><td>Налог на доход</td><td>${taxRate}%</td></tr>
-                    <tr><td>Ежемесячное пополнение</td><td>${formatNumber(monthlyContribution)} TJS</td></tr>
-                    <tr><td>Срок расчета</td><td>${termMonths} месяцев</td></tr>
-                </table>
-            </div>
+  const pdfContent = generatePDF({
+    title: 'Калькулятор депозита',
+    initialDeposit,
+    annualRate,
+    taxRate,
+    monthlyContribution,
+    termMonths,
+    calculations,
+    formatNumber
+  });
 
-            <div class="section">
-                <h2>Расчетные показатели</h2>
-                <table>
-                    <tr><th>Параметр</th><th>Значение</th></tr>
-                    <tr><td>Чистая годовая ставка</td><td>${(netAnnualRate * 100).toFixed(2)}%</td></tr>
-                    <tr><td>Чистая месячная ставка</td><td>${(netMonthlyRate * 100).toFixed(4)}%</td></tr>
-                    <tr><td>Месячный доход</td><td>${formatNumber(monthlyIncome)} </td></tr>
-                    <tr><td>Итого вложено</td><td>${formatNumber(totalContributions)} </td></tr>
-                    <tr><td>Общий доход</td><td>${formatNumber(totalInterest)} </td></tr>
-                    <tr class="highlight"><td>Итоговая сумма</td><td>${formatNumber(finalAmount)} </td></tr>
-                </table>
-            </div>
+  printWindow.document.open();
+  printWindow.document.write(pdfContent);
+  printWindow.document.close();
 
-            <div class="section">
-                <h2>Помесячный прогноз (первые 12 месяцев)</h2>
-                <table>
-                    <tr>
-                        <th>Месяц</th>
-                        <th>Сумма в начале</th>
-                        <th>Начислено %</th>
-                        <th>Сумма в конце</th>
-                    </tr>
-                    ${calculations.slice(0, 12).map(calc => `
-                        <tr>
-                            <td>${calc.month}</td>
-                            <td>${formatNumber(calc.startAmount)}</td>
-                            <td>+${formatNumber(calc.interestEarned)}</td>
-                            <td>${formatNumber(calc.endAmount)}</td>
-                        </tr>
-                    `).join('')}
-                    ${termMonths > 12 ? `
-                        <tr>
-                            <td colspan="4" style="text-align: center; font-style: italic;">
-                                ... и еще ${termMonths - 12} месяцев
-                            </td>
-                        </tr>
-                    ` : ''}
-                </table>
-            </div>
-
-            <div class="footer">
-                <p>Отчет сгенерирован калькулятором депозита</p>
-                <p>Дата: ${new Date().toLocaleDateString()}</p>
-            </div>
-
-            <div class="no-print" style="margin-top: 30px; text-align: center;">
-                <button onclick="window.print()" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                    🖨️ Печать отчета
-                </button>
-                <button onclick="window.close()" style="padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer; margin-left: 10px;">
-                    ❌ Закрыть окно
-                </button>
-            </div>
-        </body>
-        </html>
-    `;
-
-    // Открываем в новом окне и даем команду на печать
-    printWindow.document.open();
-    printWindow.document.write(pdfContent);
-    printWindow.document.close();
-    
-    // Автоматически открываем диалог печати (который можно сохранить как PDF)
-    setTimeout(() => {
-        printWindow.print();
-    }, 500);
+  setTimeout(() => {
+    printWindow.print();
+  }, 500);
 }
+
 
 // [МОДУЛЬ: Графики Chart.js]
 // Инициализация графика
