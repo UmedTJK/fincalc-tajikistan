@@ -16,6 +16,11 @@
 ## 🚀 Текущая версия проекта
 
 ## v0.4.5
+### Added
+- Live demo deployed via GitHub Pages
+
+
+## v0.4.5
 ### Changed
 - Extracted PDF export logic into `modules/export/pdf.js`
 - Unified export architecture (CSV & PDF)

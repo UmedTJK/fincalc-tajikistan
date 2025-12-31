@@ -142,6 +142,14 @@ Responsibilities:
 
 ---
 
+
+## 🌍 Deployment
+
+The project is deployed as a static site using GitHub Pages.
+No backend or server-side logic is involved.
+
+---
+
 📌 **Архитектура утверждена**  
 Версия документа: **v1.1**  
 Актуальна для версии проекта: **v0.4.4**
