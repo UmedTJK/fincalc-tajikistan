@@ -2,7 +2,7 @@
 
 
 ## 2025
-✔ Public demo (GitHub Pages) — completed
+✔ Public demo (GitHub Pages) — completed (https://umedtjk.github.io/fincalc-tajikistan/)
 - перевод интерфейса на TJ
 - PWA-версия для телефона
 - авто-сохранение сценариев

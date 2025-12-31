@@ -15,9 +15,17 @@
 
 ## 🚀 Текущая версия проекта
 
-## v0.4.5
+## v0.4.5 – Refactor only
+
+### Changed
+- Structured `script.js` into clear architectural sections
+- Improved readability and maintainability
+- No logic or behavior changes
+
+
+## v0.4.6
 ### Added
-- Live demo deployed via GitHub Pages
+- Live demo deployed via GitHub Pages (https://umedtjk.github.io/fincalc-tajikistan/)
 
 
 ## v0.4.5
