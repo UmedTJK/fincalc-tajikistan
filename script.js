@@ -291,19 +291,8 @@ function calculateDeposit() {
     renderCalculationsTable(calculations, formatNumber);
     const chartData = calculateAllCapitalizationScenarios();
     updateChart(chartData);
+    } // ← ВОТ ЭТОГО НЕ ХВАТАЛО
     
-    // 🔥 ФИКС: Обновляем данные для шаринга
-    shareCalculation({
-        initialDeposit,
-        annualRate: annualRate * 100,
-        taxRate: taxRate * 100,
-        monthlyContribution,
-        termMonths,
-        finalAmount,
-        totalInterest,
-        formatNumber
-    });
-}
 
 
 

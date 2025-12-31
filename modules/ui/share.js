@@ -71,21 +71,18 @@ function fallbackShare(text) {
     .catch(() => alert('📋 Скопируйте текст:\n\n' + text));
 }
 
-export function shareCalculation(params) {
-  const data = prepareShareData(params);
-  const text = `💰 РАСЧЕТ ДЕПОЗИТА - FinCalc.TJ
+export function shareCalculation(text) {
+  if (navigator.share) {
+    navigator.share({
+      title: 'Расчёт депозита — FinCalc.TJ',
+      text
+    });
+  } else {
+    navigator.clipboard.writeText(text);
+    showToast('Текст скопирован в буфер обмена!');
+  }
+}
 
-📊 Параметры:
-• Начальная сумма: ${data.formatNumber(data.initialDeposit)} TJS
-• Годовая ставка: ${data.annualRate}%
-• Налог: ${data.taxRate}%
-• Пополнение: ${data.formatNumber(data.monthlyContribution)} TJS/мес
-• Срок: ${data.termMonths} месяцев
-
-📈 Результаты:
-• Итоговая сумма: ${data.formatNumber(data.finalAmount)} TJS
-• Общий доход: ${data.formatNumber(data.totalInterest)} TJS
-• Дата расчета: ${data.timestamp}
 
 🔗 ${data.url}`;
 

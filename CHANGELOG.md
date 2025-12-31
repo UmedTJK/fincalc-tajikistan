@@ -15,6 +15,31 @@
 
 ## 🚀 Текущая версия проекта
 
+## v0.5.0 — UI Refactor & Stabilization
+**Release date:** 2025-12-31
+
+### Changed
+- UI logic fully extracted into `/modules/ui`
+  - Chart rendering (`chart-ui.js`)
+  - Calculations table rendering (`table.js`)
+  - Theme switcher (`themes.js`)
+  - Share / Web Share API logic (`share.js`)
+- `script.js` reduced to orchestration layer only
+- Application initialization stabilized (single DOMContentLoaded entry point)
+- Improved separation of concerns (UI vs business logic)
+- Project structure aligned for long-term maintainability and AI-assisted refactoring
+
+### Fixed
+- UI initialization order issues
+- Chart and table rendering inconsistencies
+- Theme application timing issues
+- Share logic causing JS runtime errors
+
+### Notes
+- No changes to calculation formulas or business logic
+- This release is a structural refactor focused on code quality and stability
+
+
 ## v0.4.5 – Refactor only
 
 ### Changed
