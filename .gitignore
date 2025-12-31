@@ -1,0 +1,18 @@
+# 🔐 NEVER COMMIT PRIVATE KEYS
+*.pem
+*.key
+*.pub
+*.p12
+*.der
+*.csr
+*.crt
+*.ovpn
+.ssh/
+.android/
+
+# System files
+.DS_Store
+
+# Mac system dirs
+Desktop/
+

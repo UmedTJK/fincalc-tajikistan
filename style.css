@@ -1,0 +1,904 @@
+/* Современный CSS для калькулятора депозита */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --secondary: #64748b;
+    --accent: #f59e0b;
+    --success: #10b981;
+    --danger: #ef4444;
+    --background: #f8fafc;
+    --surface: #ffffff;
+    --text: #1e293b;
+    --text-light: #64748b;
+    --border: #e2e8f0;
+    --border-hover: #cbd5e1;
+}
+
+body {
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    background: var(--background);
+    min-height: 100vh;
+    padding: 20px;
+    color: var(--text);
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1600px;
+    margin: 0 auto;
+    background: var(--surface);
+    border-radius: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border);
+    overflow: hidden;
+}
+
+/* Современный header */
+.header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    padding: 60px 40px;
+    text-align: center;
+    position: relative;
+}
+
+.header-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.header h1 {
+    font-size: 3rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    margin-bottom: 16px;
+    background: linear-gradient(135deg, #fff 0%, #e0f2fe 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+}
+
+.header p {
+    font-size: 1.25rem;
+    opacity: 0.9;
+    color: white;
+    max-width: 500px;
+    margin: 0 auto;
+    line-height: 1.6;
+    font-weight: 400;
+}
+
+/* Переключатель тем */
+.theme-switcher {
+    position: absolute;
+    top: 25px;
+    right: 25px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    z-index: 1000;
+}
+
+.theme-btn {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.theme-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-1px);
+}
+
+.theme-btn.active {
+    background: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.4);
+}
+
+.main-content {
+    padding: 40px;
+}
+
+.input-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    margin-bottom: 40px;
+}
+
+/* ОПТИМАЛЬНОЕ РЕШЕНИЕ ДЛЯ ВХОДНЫХ ДАННЫХ */
+.input-group {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    padding: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+}
+
+.input-group h2 {
+    grid-column: 1 / -1;
+    margin-bottom: 16px;
+    font-size: 1.4rem;
+    color: var(--primary);
+    font-weight: 700;
+}
+
+.form-group {
+    margin-bottom: 0;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 11px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.95rem;
+    background: var(--surface);
+    transition: all 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* Адаптивность */
+@media (max-width: 968px) {
+    .input-group {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .input-group {
+        padding: 20px 16px;
+        gap: 12px;
+    }
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* Карточки результатов */
+.result-card {
+    background: var(--surface);
+    border: 1px solid #f1f5f9;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.result-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: var(--border-hover);
+}
+
+.result-card.highlight {
+    background: #fffbeb;
+    border-color: #fed7aa;
+}
+
+.result-label {
+    font-weight: 500;
+    color: var(--text-light);
+    font-size: 0.95rem;
+}
+
+.result-value {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--success);
+}
+
+.result-value.highlight {
+    color: #ea580c;
+    font-size: 1.3rem;
+    font-weight: 700;
+}
+
+/* Кнопки экспорта */
+.export-section {
+    text-align: center;
+    margin: 40px 0;
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.export-btn {
+    background: var(--primary);
+    color: white;
+    padding: 14px 28px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.export-btn:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.export-btn.pdf-btn {
+    background: var(--danger);
+}
+
+.export-btn.pdf-btn:hover {
+    background: #dc2626;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+/* Таблица */
+.table-container {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 32px;
+}
+
+.table-header {
+    background: #f8fafc;
+    padding: 24px;
+    border-bottom: 1px solid var(--border);
+}
+
+.table-header h2 {
+    color: var(--text);
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    background: #f8fafc;
+    font-weight: 600;
+    color: var(--text);
+    padding: 20px;
+    text-align: center;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border);
+}
+
+td {
+    padding: 20px;
+    text-align: center;
+    border-bottom: 1px solid #f1f5f9;
+    animation: fadeInUp 0.8s ease-out forwards;
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Задержки для анимации ячеек */
+td:nth-child(1) { animation-delay: 0.1s; }
+td:nth-child(2) { animation-delay: 0.2s; }
+td:nth-child(3) { animation-delay: 0.3s; }
+td:nth-child(4) { animation-delay: 0.4s; }
+td:nth-child(5) { animation-delay: 0.5s; }
+td:nth-child(6) { animation-delay: 0.6s; }
+td:nth-child(7) { animation-delay: 0.7s; }
+td:nth-child(8) { animation-delay: 0.8s; }
+
+/* Стили для ячеек таблицы */
+.interest-cell {
+    color: var(--success);
+    font-weight: 600;
+}
+
+.tax-cell {
+    color: var(--danger);
+    font-weight: 600;
+}
+
+.capitalization-cell {
+    color: var(--success);
+    font-weight: 600;
+}
+
+.contribution-cell {
+    color: #8b5cf6;
+    font-weight: 600;
+}
+
+.amount-cell {
+    color: var(--primary);
+    font-weight: 700;
+}
+
+/* Анимации для строк таблицы */
+tbody tr {
+    transition: all 0.3s ease;
+}
+
+tbody tr:hover {
+    background: #f8fafc;
+    transform: scale(1.01);
+}
+
+tbody tr:hover td {
+    font-weight: 600;
+}
+
+/* График */
+.chart-container {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin: 32px 0;
+}
+
+.chart-header {
+    background: #f8fafc;
+    padding: 20px;
+    border-bottom: 1px solid var(--border);
+    border-radius: 16px 16px 0 0;
+}
+
+.chart-header h2 {
+    color: var(--text);
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+#depositChart {
+    width: 100% !important;
+    height: 300px !important;
+}
+
+.footer-note {
+    text-align: center;
+    color: var(--text-light);
+    margin-top: 32px;
+    font-style: italic;
+    font-size: 0.95rem;
+}
+
+.icon {
+    width: 24px;
+    height: 24px;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .header {
+        padding: 40px 24px;
+    }
+    
+    .header h1 {
+        font-size: 2.25rem;
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .header p {
+        font-size: 1.1rem;
+    }
+    
+    .main-content {
+        padding: 24px;
+    }
+    
+    .input-section {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+    
+    .input-group,
+    .results-section {
+        padding: 24px;
+    }
+    
+    .theme-switcher {
+        position: relative;
+        top: 0;
+        right: 0;
+        margin: 20px 0;
+        justify-content: center;
+    }
+    
+    .export-section {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .export-btn {
+        width: 100%;
+        max-width: 280px;
+    }
+    
+    th, td {
+        padding: 16px 12px;
+        font-size: 0.9rem;
+    }
+    
+    .table-container {
+        overflow-x: auto;
+    }
+    
+    table {
+        min-width: 800px;
+    }
+}
+
+@media (max-width: 480px) {
+    .header h1 {
+        font-size: 2rem;
+    }
+    
+    .header p {
+        font-size: 1rem;
+    }
+    
+    .theme-btn {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+    }
+    
+    .input-group h2,
+    .results-section h2 {
+        font-size: 1.3rem;
+    }
+}
+
+/* Специфичные стили для тем */
+[data-theme="dark-gradient"] .header,
+[data-theme="futuristic"] .header {
+    background: linear-gradient(135deg, #0056b3 0%, #003d82 100%);
+}
+
+[data-theme="dark-gradient"] .input-group,
+[data-theme="dark-gradient"] .results-section,
+[data-theme="futuristic"] .input-group,
+[data-theme="futuristic"] .results-section {
+    background: rgba(255, 255, 255, 0.95);
+}
+
+[data-theme="dark-gradient"] .table-container,
+[data-theme="futuristic"] .table-container {
+    background: rgba(255, 255, 255, 0.98);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Анимации для блока входных данных */
+.input-group {
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transform: perspective(1000px) translateZ(0);
+    transform-style: preserve-3d;
+}
+
+.input-group:hover {
+    transform: perspective(1000px) translateZ(15px) scale(1.02);
+    box-shadow: 
+        0 15px 35px rgba(0, 123, 255, 0.15),
+        0 8px 20px rgba(0, 123, 255, 0.1),
+        inset 0 0 20px rgba(255, 255, 255, 0.1);
+    filter: drop-shadow(0 12px 20px rgba(0, 123, 255, 0.2));
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
+    border-left: 4px solid var(--primary-dark);
+}
+
+.input-group:hover h2 {
+    color: var(--primary-dark);
+    transform: translateX(5px);
+}
+
+/* Анимация для полей ввода внутри блока */
+.form-group {
+    transition: all 0.4s ease;
+}
+
+.form-group:hover {
+    transform: translateY(-2px);
+}
+
+.form-group:hover label {
+    color: var(--primary-dark);
+    font-weight: 600;
+}
+
+.form-group:hover input,
+.form-group:hover select {
+    border-color: var(--primary-dark);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* Анимация для селектов */
+.currency-select:hover,
+.capitalization-select:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+}
+
+/* Анимация для карточек результатов */
+.result-card {
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transform: perspective(1000px) translateZ(0);
+    transform-style: preserve-3d;
+}
+
+.result-card:hover {
+    transform: perspective(1000px) translateZ(10px) scale(1.02);
+    box-shadow: 
+        0 12px 30px rgba(0, 0, 0, 0.15),
+        0 6px 18px rgba(0, 0, 0, 0.1),
+        inset 0 0 15px rgba(255, 255, 255, 0.1);
+    filter: drop-shadow(0 10px 15px rgba(0, 123, 255, 0.15));
+}
+
+.result-card.highlight:hover {
+    transform: perspective(1000px) translateZ(15px) scale(1.03);
+    box-shadow: 
+        0 15px 35px rgba(16, 185, 129, 0.2),
+        0 8px 20px rgba(16, 185, 129, 0.15),
+        inset 0 0 20px rgba(255, 255, 255, 0.1);
+    filter: drop-shadow(0 12px 18px rgba(16, 185, 129, 0.2));
+}
+
+/* Анимация для строк таблицы */
+tbody tr {
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transform: scale(1);
+}
+
+tbody tr:hover {
+    transform: scale(1.01);
+    box-shadow: 
+        0 10px 25px rgba(0, 0, 0, 0.1),
+        0 5px 15px rgba(0, 0, 0, 0.05);
+    margin: 8px 0;
+    z-index: 10;
+    position: relative;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%) !important;
+    filter: drop-shadow(0 8px 12px rgba(0, 123, 255, 0.15));
+}
+
+/* Анимация для заголовка таблицы */
+.table-header {
+    transition: all 0.4s ease;
+}
+
+.table-header:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+}
+
+.table-header:hover h2 {
+    transform: scale(1.03);
+}
+
+/* Волновая анимация для строк таблицы */
+@keyframes waveIn {
+    0% {
+        opacity: 0;
+        transform: translateX(-30px) rotate(-1deg);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0) rotate(0);
+    }
+}
+
+#calculationsTable tbody tr {
+    animation: waveIn 0.6s ease-out forwards;
+    opacity: 0;
+}
+
+/* Задержка для каждой строки */
+#calculationsTable tbody tr:nth-child(1) { animation-delay: 0.1s; }
+#calculationsTable tbody tr:nth-child(2) { animation-delay: 0.2s; }
+#calculationsTable tbody tr:nth-child(3) { animation-delay: 0.3s; }
+#calculationsTable tbody tr:nth-child(4) { animation-delay: 0.4s; }
+#calculationsTable tbody tr:nth-child(5) { animation-delay: 0.5s; }
+#calculationsTable tbody tr:nth-child(n+6) { animation-delay: 0.6s; }
+
+
+/* Стили для блока результатов */
+.results-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.results-section:hover {
+    transform: perspective(1000px) translateZ(10px);
+    box-shadow: 
+        0 15px 35px rgba(0, 123, 255, 0.15),
+        0 8px 20px rgba(0, 123, 255, 0.1);
+    border-left: 4px solid var(--primary);
+}
+
+.results-section h2 {
+    color: var(--primary);
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    text-align: center;
+}
+
+/* Анимация для карточек результатов при появлении */
+@keyframes slideInResults {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.result-card {
+    animation: slideInResults 0.6s ease-out forwards;
+    opacity: 0;
+}
+
+/* Задержка для каждой карточки */
+.result-card:nth-child(1) { animation-delay: 0.1s; }
+.result-card:nth-child(2) { animation-delay: 0.2s; }
+.result-card:nth-child(3) { animation-delay: 0.3s; }
+.result-card:nth-child(4) { animation-delay: 0.4s; }
+.result-card:nth-child(5) { animation-delay: 0.5s; }
+.result-card:nth-child(6) { animation-delay: 0.6s; }
+
+/* Стили для кнопки Поделиться */
+.export-btn.share-btn {
+    background: #8b5cf6;
+}
+
+.export-btn.share-btn:hover {
+    background: #7c3aed;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+/* Стили для модального окна поделиться */
+.share-options {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    backdrop-filter: blur(5px);
+}
+
+.share-modal {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    text-align: center;
+    position: relative;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.share-modal h3 {
+    margin-bottom: 20px;
+    color: #2563eb;
+    font-size: 1.4rem;
+}
+
+.share-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.share-option-btn {
+    padding: 15px 20px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    background: white;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.share-option-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    border-color: #2563eb;
+}
+
+.close-share {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #64748b;
+    padding: 5px;
+}
+
+.close-share:hover {
+    color: #dc2626;
+}
+
+/* Анимация появления */
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8) translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.share-modal {
+    animation: modalSlideIn 0.4s ease-out;
+}
+
+/* Анимация для кнопки поделиться */
+.export-btn.share-btn {
+    position: relative;
+    overflow: hidden;
+}
+
+.export-btn.share-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.export-btn.share-btn:hover::before {
+    left: 100%;
+}
+
+/* Эффект пульсации при успешном分享 */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.share-success {
+    animation: pulse 0.6s ease-in-out;
+}
+
+/* Стили для нового модуля выбора банка */
+.bank-select, .deposit-product-select {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    background-color: white;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.bank-select:hover, .deposit-product-select:hover {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.bank-logo {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    vertical-align: middle;
+    display: inline-block;
+}
+
+.deposit-option {
+    padding: 8px 12px;
+}
+
+.deposit-info {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-top: 4px;
+    display: block;
+}
+
+/* Плавное появление блоков срок/валюта */
+#termGroup, #currencyGroup {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.4s ease;
+}
+#termGroup.show, #currencyGroup.show {
+  display: block !important;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+#termGroup, #currencyGroup {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.4s ease;
+}
+#termGroup.show, #currencyGroup.show {
+  display: block !important;
+  opacity: 1;
+  transform: translateY(0);
+}
