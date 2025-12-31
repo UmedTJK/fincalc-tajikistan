@@ -19,7 +19,12 @@
 │
 ├── index.html              # UI, структура интерфейса
 ├── style.css               # стили, темы, адаптив
-├── script.js               # основная логика
+ ├─ script.js  ← станет легче после создание отдельных interest.js banks.js share.js  chart.js 
+ ├─ /modules
+ │     ├─ interest.js     ← расчёты
+ │     ├─ banks.js        ← банки
+ │     ├─ share.js        ← шаринг
+ │     ├─ chart.js        ← графики
 │
 ├── DATA_BANKS.md           # формат и правила банковских данных
 ├── ROADMAP.md              # планы по годам
@@ -60,8 +65,18 @@ pdf.js
 excel.js
 
 ```
+## Data Modules
 
----
+### banks.js
+Contains structured deposit data for supported banks in Tajikistan.
+The module exports a single object `banksData` which is consumed by UI logic
+(bank and deposit selectors) without any business logic inside.
+
+Purpose:
+- separation of data from UI logic
+- easier maintenance and future updates
+- preparation for JSON/API-based data sources
+
 
 ## 🔥 Принципы разработки
 
