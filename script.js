@@ -1,3 +1,6 @@
+import { calculateMonthlyInterest } from './modules/interest.js';
+
+
 // Глобальные переменные
 let calculations = [];
 let depositChart = null;
@@ -56,14 +59,13 @@ function calculateWithCapitalization() {
         monthDate.setMonth(startDate.getMonth() + month - 1);
         const formattedDate = formatDate(monthDate);
         
-        // Расчет процентов (до вычета налогов)
-        const grossMonthlyInterest = currentAmount * (grossAnnualRate / 12);
-        
-        // Расчет налога
-        const monthlyTax = grossMonthlyInterest * taxRate;
-        
-        // Чистые проценты (после вычета налогов)
-        const netMonthlyInterest = grossMonthlyInterest - monthlyTax;
+        // Расчет процентов и налога (interest.js)
+        const { gross, tax, net } = calculateMonthlyInterest(
+          currentAmount,
+          grossAnnualRate,
+          taxRate
+        );
+
         
         // Сумма капитализации (зависит от типа)
         let capitalizedAmount = 0;
