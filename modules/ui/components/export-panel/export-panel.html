@@ -1,50 +1,294 @@
 <!-- Компонент: Панель экспорта -->
 <!-- Кнопки экспорта -->
 <div class="export-section">
-    <button class="export-btn" id="exportBtn">
-        <svg class="icon" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
-        </svg>
-        Экспортировать в Excel
-    </button>
+    <div class="export-buttons-container">
+        <button class="export-btn" id="exportBtn">
+            <svg class="icon" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+            </svg>
+            Экспортировать в Excel
+        </button>
 
-    <button class="export-btn pdf-btn" id="exportPdfBtn">
-        <svg class="icon" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M19,3H5C3.9,3,3,3.9,3,5v14c0,1.1,0.9,2,2,2h14c1.1,0,2-0.9,2-2V5C21,3.9,20.1,3,19,3z M9.5,15H8V9h1.5V15z M12.75,15h-1.5V9h1.5V15z M16,15h-1.5V9H16V15z"/>
-        </svg>
-        Экспортировать в PDF
-    </button>
+        <button class="export-btn pdf-btn" id="exportPdfBtn">
+            <svg class="icon" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M19,3H5C3.9,3 3,3.9 3,5v14c0,1.1 0.9,2 2,2h14c1.1,0 2-0.9,2-2V5C21,3.9 20.1,3 19,3z M9.5,15H8V9h1.5V15z M12.75,15h-1.5V9h1.5V15z M16,15h-1.5V9H16V15z"/>
+            </svg>
+            Экспортировать в PDF
+        </button>
 
-    <button class="export-btn screenshot-btn" id="screenshotBtn">
-        <svg class="icon" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M10,10H8V18H10V10M14,10H12V18H14V10M16,10H15V18H16V10Z"/>
-        </svg>
-        Скриншот графика
-    </button>
+        <button class="export-btn screenshot-btn" id="screenshotBtn">
+            <svg class="icon" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M10,10H8V18H10V10M14,10H12V18H14V10M16,10H15V18H16V10Z"/>
+            </svg>
+            Скриншот графика
+        </button>
 
-    <button class="export-btn share-btn" id="shareBtn">
-        <svg class="icon" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M18,16.08C17.24,16.08 16.56,16.38 16.04,16.85L8.91,12.7C8.96,12.47 9,12.24 9,12C9,11.76 8.96,11.53 8.91,11.3L15.96,7.19C16.5,7.69 17.21,8 18,8A3,3 0 0,0 21,5A3,3 0 0,0 18,2A3,3 0 0,0 15,5C15,5.24 15.04,5.47 15.09,5.7L8.04,9.81C7.5,9.31 6.79,9 6,9A3,3 0 0,0 3,12A3,3 0 0,0 6,15C6.79,15 7.5,14.69 8.04,14.19L15.16,18.34C15.11,18.55 15.08,18.77 15.08,19C15.08,20.61 16.39,21.91 18,21.91C19.61,21.91 20.92,20.61 20.92,19A2.92,2.92 0 0,0 18,16.08Z"/>
-        </svg>
-        Поделиться расчетом
-    </button>
+        <button class="export-btn share-btn" id="shareBtn">
+            <svg class="icon" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M18,16.08C17.24,16.08 16.56,16.38 16.04,16.85L8.91,12.7C8.96,12.47 9,12.24 9,12C9,11.76 8.96,11.53 8.91,11.3L15.96,7.19C16.5,7.69 17.21,8 18,8A3,3 0 0,0 21,5A3,3 0 0,0 18,2A3,3 0 0,0 15,5C15,5.24 15.04,5.47 15.09,5.7L8.04,9.81C7.5,9.31 6.79,9 6,9A3,3 0 0,0 3,12A3,3 0 0,0 6,15C6.79,15 7.5,14.69 8.04,14.19L15.16,18.34C15.11,18.55 15.08,18.77 15.08,19C15.08,20.61 16.39,21.91 18,21.91C19.61,21.91 20.92,20.61 20.92,19A2.92,2.92 0 0,0 18,16.08Z"/>
+            </svg>
+            Поделиться расчетом
+        </button>
+    </div>
 </div>
 
 <!-- Модальное окно шаринга -->
 <div class="share-options" id="shareOptions" style="display: none;">
     <div class="share-modal">
+        <button class="close-share" id="closeShareBtn">✕</button>
         <h3>📤 Поделиться расчетом</h3>
         <div class="share-buttons">
             <button class="share-option-btn" data-type="text">
-                📝 Текстовый формат
+                <span class="share-icon">📝</span>
+                <span class="share-text">Текстовый формат</span>
             </button>
             <button class="share-option-btn" data-type="image">
-                🖼️ Скриншот графика
+                <span class="share-icon">🖼️</span>
+                <span class="share-text">Скриншот графика</span>
             </button>
             <button class="share-option-btn" data-type="social">
-                🌐 Соцсети
+                <span class="share-icon">🌐</span>
+                <span class="share-text">Соцсети</span>
             </button>
         </div>
-        <button class="close-share" id="closeShareBtn">✕</button>
     </div>
 </div>
+
+<!-- Стили для правильного отображения -->
+<style>
+    .export-section {
+        width: 100%;
+        margin: 30px 0;
+        padding: 20px 0;
+    }
+    
+    .export-buttons-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        justify-content: center;
+        align-items: center;
+        max-width: 100%;
+    }
+    
+    .export-btn {
+        background: var(--primary, #2563eb);
+        color: white;
+        padding: 14px 24px;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 200px;
+        justify-content: center;
+        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+    }
+    
+    .export-btn:hover {
+        background: var(--primary-dark, #1d4ed8);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+    
+    .export-btn.pdf-btn {
+        background: var(--danger, #ef4444);
+    }
+    
+    .export-btn.pdf-btn:hover {
+        background: #dc2626;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+    
+    .export-btn.share-btn {
+        background: #8b5cf6;
+    }
+    
+    .export-btn.share-btn:hover {
+        background: #7c3aed;
+        box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+    }
+    
+    .export-btn.screenshot-btn {
+        background: #10b981;
+    }
+    
+    .export-btn.screenshot-btn:hover {
+        background: #0da271;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+    
+    .icon {
+        width: 20px;
+        height: 20px;
+    }
+    
+    /* Стили для модального окна */
+    .share-options {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+        backdrop-filter: blur(5px);
+    }
+    
+    .share-modal {
+        background: white;
+        padding: 30px;
+        border-radius: 20px;
+        text-align: center;
+        position: relative;
+        max-width: 400px;
+        width: 90%;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+    
+    .share-modal h3 {
+        margin-bottom: 25px;
+        color: var(--primary, #2563eb);
+        font-size: 1.4rem;
+        font-weight: 700;
+    }
+    
+    .share-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        margin-bottom: 10px;
+    }
+    
+    .share-option-btn {
+        padding: 18px 20px;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        background: white;
+        font-size: 1.05rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: left;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        color: #334155;
+    }
+    
+    .share-option-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        border-color: var(--primary, #2563eb);
+        background: #f8fafc;
+    }
+    
+    .share-icon {
+        font-size: 1.3rem;
+    }
+    
+    .share-text {
+        flex: 1;
+    }
+    
+    .close-share {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: none;
+        border: none;
+        font-size: 1.8rem;
+        cursor: pointer;
+        color: #64748b;
+        padding: 5px;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: all 0.2s ease;
+    }
+    
+    .close-share:hover {
+        color: #dc2626;
+        background: #fef2f2;
+    }
+    
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .export-buttons-container {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .export-btn {
+            width: 100%;
+            max-width: 100%;
+            min-width: unset;
+        }
+        
+        .share-modal {
+            padding: 20px;
+            width: 95%;
+        }
+        
+        .share-option-btn {
+            padding: 16px 18px;
+            font-size: 1rem;
+        }
+    }
+</style>
+
+<!-- Скрипт для инициализации -->
+<script type="module">
+    console.log('✅ Export Panel HTML загружен');
+    
+    // Делаем функции доступными глобально после загрузки модуля
+    setTimeout(async () => {
+        try {
+            const shareModule = await import('../../share.js');
+            
+            // Делаем функции глобально доступными
+            window.showShareOptions = shareModule.showShareOptions || function() {
+                document.getElementById('shareOptions').style.display = 'flex';
+            };
+            
+            window.hideShareOptions = shareModule.hideShareOptions || function() {
+                document.getElementById('shareOptions').style.display = 'none';
+            };
+            
+            window.shareAsText = shareModule.shareAsText;
+            window.shareToSocial = shareModule.shareToSocial;
+            
+            console.log('✅ Функции шаринга загружены');
+            
+        } catch (error) {
+            console.warn('⚠️ Не удалось загрузить модуль шаринга:', error);
+            
+            // Fallback функции
+            window.showShareOptions = function() {
+                document.getElementById('shareOptions').style.display = 'flex';
+            };
+            
+            window.hideShareOptions = function() {
+                document.getElementById('shareOptions').style.display = 'none';
+            };
+            
+            window.shareAsText = function() {
+                alert('Функция шаринга текстом временно недоступна');
+            };
+            
+            window.shareToSocial = function() {
+                alert('Функция шаринга в соцсети временно недоступна');
+            };
+        }
+    }, 100);
+</script>

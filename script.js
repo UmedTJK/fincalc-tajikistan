@@ -27,7 +27,9 @@ async function loadAllComponents() {
             { name: 'header', selector: '#header-container', priority: 1 },
             { name: 'calculator-form', selector: '#calculator-container', priority: 2 },
             { name: 'export-panel', selector: '#export-container', priority: 3 },
-            { name: 'table-chart', selector: '#table-chart-container', priority: 4 }
+            { name: 'table-chart', selector: '#table-chart-container', priority: 4 },
+            // Добавляем футер с низким приоритетом (после загрузки основного контента)
+            { name: 'footer', selector: '#footer-container', priority: 5 }
         ];
         
         // Сортируем по приоритету
@@ -647,6 +649,13 @@ function initComponentsInteraction() {
         console.log('🏦 Банк выбран (событие от компонента):', e.detail);
         // Здесь можно добавить логику обработки выбора банка
     });
+
+        // Слушаем навигацию из футера
+    document.addEventListener('footer-navigate', (e) => {
+        console.log('📍 Навигация из футера:', e.detail.section);
+        this.handleFooterNavigation(e.detail.section);
+    });
+
     
     // Слушаем запросы экспорта от компонента export-panel
     document.addEventListener('exportToExcelRequested', () => {
@@ -681,6 +690,25 @@ function initComponentsInteraction() {
                 return null;
             });
         }
+    });
+
+        // Добавляем этот обработчик для шаринга скриншота
+    document.addEventListener('requestScreenshotForShare', () => {
+        console.log('📸 Запрос скриншота для шаринга от компонента');
+        
+        // Проверяем что модули загружены
+        if (!modules.share || !modules.chartUi) {
+            console.warn('[FinCalc] Модули для шаринга не загружены');
+            return;
+        }
+        
+        // Передаем функцию takeChartScreenshot в shareAsImage
+        modules.share.shareAsImage(() => {
+            if (modules.chartUi.takeChartScreenshot) {
+                return modules.chartUi.takeChartScreenshot();
+            }
+            return null;
+        });
     });
 }
 

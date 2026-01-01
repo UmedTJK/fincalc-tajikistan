@@ -39,6 +39,11 @@
   </div>
 </section>
 
+
+<!-- Контейнер для футера -->
+<div id="footer-container"></div>
+
+
 <script type="module">
     // Импортируем функцию applyTheme
     import { applyTheme } from './modules/ui/themes.js';
@@ -109,6 +114,99 @@
         });
     });
 </script>
+
+<script type="module">
+    // Прямая загрузка футера как fallback
+    document.addEventListener('DOMContentLoaded', async () => {
+        // Ждем 1 секунду чтобы основные компоненты загрузились
+        setTimeout(async () => {
+            const footerContainer = document.getElementById('footer-container');
+            
+            if (!footerContainer) {
+                console.error('❌ Контейнер футера не найден');
+                return;
+            }
+            
+            // Проверяем если футер уже загрузился системой
+            const isFooterLoaded = footerContainer.innerHTML && 
+                                  !footerContainer.innerHTML.includes('загружается') &&
+                                  !footerContainer.innerHTML.includes('Загружается') &&
+                                  !footerContainer.innerHTML.includes('footer-placeholder');
+            
+            if (isFooterLoaded) {
+                console.log('✅ Футер уже загружен системой');
+                return;
+            }
+            
+            console.log('🔄 Загружаем футер напрямую...');
+            
+            try {
+                // Пробуем загрузить из правильного пути
+                const { Footer } = await import('./modules/ui/components/Footer/footer.js');
+                const footer = new Footer();
+                footer.init(footerContainer);
+                console.log('✅ Футер загружен напрямую');
+            } catch (error) {
+                console.error('❌ Ошибка загрузки футера:', error.message);
+                
+                // Минимальный fallback футер
+                const currentYear = new Date().getFullYear();
+                footerContainer.innerHTML = `
+                    <footer style="
+                        background: var(--surface); 
+                        border-top: 1px solid var(--border); 
+                        padding: 2rem 0; 
+                        margin-top: 3rem;
+                        width: 100%;
+                    ">
+                        <div style="
+                            max-width: 1200px; 
+                            margin: 0 auto; 
+                            padding: 0 1rem;
+                        ">
+                            <div style="
+                                text-align: center; 
+                                color: var(--text-light);
+                            ">
+                                <div style="
+                                    font-size: 1.5rem; 
+                                    font-weight: 700; 
+                                    color: var(--primary); 
+                                    margin-bottom: 0.5rem;
+                                ">
+                                    FinCalc.TJ
+                                    <span style="
+                                        font-size: 0.875rem; 
+                                        background: var(--surface); 
+                                        padding: 0.125rem 0.5rem; 
+                                        border-radius: 6px; 
+                                        border: 1px solid var(--border); 
+                                        margin-left: 0.5rem;
+                                    ">
+                                        v0.6.1
+                                    </span>
+                                </div>
+                                <p style="margin-bottom: 1rem; line-height: 1.6;">
+                                    Калькулятор депозитов для Таджикистана
+                                </p>
+                                <div style="
+                                    border-top: 1px solid var(--border); 
+                                    padding-top: 1rem; 
+                                    font-size: 0.875rem;
+                                ">
+                                    © ${currentYear} FinCalc.TJ. Все права защищены.<br>
+                                    <small>Информация предоставляется в ознакомительных целях.</small>
+                                </div>
+                            </div>
+                        </div>
+                    </footer>
+                `;
+                console.log('⚠️ Использован минимальный футер');
+            }
+        }, 1000); // Ждем 1 секунду
+    });
+</script>
+
 
 </body>
 </html>

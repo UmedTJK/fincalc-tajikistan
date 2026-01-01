@@ -144,13 +144,53 @@ export function shareAsImage(takeChartScreenshot) {
 export function shareToSocial() {
   if (!shareData) return;
 
-  const text = encodeURIComponent('Посмотрите мой расчёт депозита на FinCalc.TJ!');
+  const message = encodeURIComponent(
+    `Посмотри мой расчёт депозита на FinCalc.TJ:\n${shareData.url}`
+  );
   const url = encodeURIComponent(shareData.url);
 
-  window.open(
-    `https://t.me/share/url?url=${url}&text=${text}`,
-    '_blank'
+  const services = {
+    telegram:  `https://t.me/share/url?url=${url}&text=${message}`,
+    whatsapp:  `https://wa.me/?text=${message}`,
+    viber:     `viber://forward?text=${message}`,
+    vk:        `https://vk.com/share.php?url=${url}&title=${message}`,
+    messenger: `fb-messenger://share/?link=${url}`,
+    instagram: null // ⚠️ Нельзя напрямую — предложим копирование
+  };
+
+  // Если браузер поддерживает системный Web Share API → даем шанс
+  if (navigator.share) {
+    navigator.share({ text: message, url: shareData.url })
+      .catch(err => console.log('WebShare API error:', err));
+    hideShareOptions();
+    return;
+  }
+
+  // 🧠 Выбор соцсети через prompt (временно)
+  const choice = prompt(
+    "Куда поделиться?\n" +
+    "1️⃣ Telegram\n2️⃣ WhatsApp\n3️⃣ Viber\n4️⃣ VK\n5️⃣ Messenger\n6️⃣ Instagram (копировать текст)"
   );
+
+  const map = {
+    1: 'telegram',
+    2: 'whatsapp',
+    3: 'viber',
+    4: 'vk',
+    5: 'messenger',
+    6: 'instagram'
+  };
+
+  const key = map[choice];
+
+  if (!key) return hideShareOptions();
+
+  if (key === 'instagram') {
+    fallbackShare(decodeURIComponent(message));
+    return;
+  }
+
+  window.open(services[key], '_blank');
 
   hideShareOptions();
 }

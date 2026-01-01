@@ -5,6 +5,21 @@
     box-sizing: border-box;
 }
 
+/* Делаем основную структуру flex для sticky footer */
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.calculator-area {
+    flex: 1 0 auto; /* Занимает все доступное пространство */
+}
+
+#footer-container {
+    flex-shrink: 0; /* Не сжимается */
+}
+
 :root {
     --primary: #2563eb;
     --primary-dark: #1d4ed8;
@@ -766,4 +781,197 @@ td {
     .results-section h2 {
         font-size: 1.3rem;
     }
+}
+
+/* ===== FOOTER STYLES ===== */
+.footer {
+  background-color: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 2rem 0;
+  margin-top: auto;
+}
+
+.footer__container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Бренд и описание */
+.footer__brand {
+  margin-bottom: 1.5rem;
+}
+
+.footer__logo {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.footer__logo-text {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.footer__version {
+  font-size: 0.875rem;
+  color: var(--text-light);
+  background: var(--surface);
+  padding: 0.125rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+
+.footer__description {
+  color: var(--text-light);
+  line-height: 1.6;
+  max-width: 400px;
+}
+
+/* Секции футера */
+.footer__sections {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.footer__section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.75rem;
+}
+
+.footer__links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer__links li {
+  margin-bottom: 0.5rem;
+}
+
+.footer__link {
+  color: var(--text-light);
+  text-decoration: none;
+  font-size: 0.875rem;
+  transition: color 0.2s ease;
+  cursor: pointer;
+  display: inline-block;
+  padding: 0.125rem 0;
+}
+
+.footer__link:hover {
+  color: var(--primary);
+}
+
+/* Банки-партнеры */
+.footer__banks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.footer__bank-badge {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text-light);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.footer__bank-badge:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  transform: translateY(-1px);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* Нижняя часть */
+.footer__bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.footer__copyright {
+  color: var(--text-light);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.footer__social {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.footer__social-button {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.5rem;
+  color: var(--text-light);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.footer__social-button:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  transform: translateY(-1px);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.footer__share-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.footer__share-button:hover {
+  background-color: var(--primary-dark);
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .footer__sections {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .footer__bottom {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer__sections {
+    grid-template-columns: 1fr;
+  }
+  
+  .footer__banks {
+    justify-content: flex-start;
+  }
 }

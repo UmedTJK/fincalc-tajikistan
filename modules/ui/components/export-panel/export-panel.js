@@ -1,115 +1,56 @@
-// Компонент: Панель экспорта
 // modules/ui/components/export-panel/export-panel.js
 console.log('📦 ExportPanel.js загружается...');
 
-// ============================
-// Класс компонента
-// ============================
-class ExportPanelComponent {
-    constructor() {
-        console.log('🚀 ExportPanelComponent создается');
-        this.init();
-    }
-
-    init() {
-        console.log('🔧 ExportPanelComponent инициализация');
-        this.bindEvents();
-    }
-
-    bindEvents() {
-        console.log('🔗 Привязка событий ExportPanel');
-
-        const bind = (id, handler) => {
-            const el = document.getElementById(id);
-            if (!el) return console.warn(`⚠️ Элемент не найден: #${id}`);
-            el.addEventListener('click', handler);
-        };
-
-        bind('exportBtn',    () => this.exportToExcel());
-        bind('exportPdfBtn', () => this.exportToPDF());
-        bind('screenshotBtn',() => this.captureScreenshot());
-        bind('shareBtn',     () => this.showShareOptions());
-        bind('closeShareBtn',() => this.hideShareOptions());
-
-        document.querySelectorAll('.share-option-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const type = e.target.getAttribute('data-type');
-                this.handleShareOption(type);
-            });
+// Простой компонент без сложной логики
+export function init() {
+    console.log('✅ ExportPanel инициализирован');
+    
+    // Находим кнопки и добавляем обработчики
+    const shareBtn = document.getElementById('shareBtn');
+    const closeShareBtn = document.getElementById('closeShareBtn');
+    const shareOptions = document.getElementById('shareOptions');
+    
+    if (shareBtn) {
+        shareBtn.addEventListener('click', () => {
+            if (shareOptions) {
+                shareOptions.style.display = 'flex';
+            }
         });
     }
-
-    // 📤 Триггеры для обработки в основном приложении
-    exportToExcel() {
-        console.log('📊 Запрос экспорта в Excel');
-        document.dispatchEvent(new Event('exportToExcelRequested'));
+    
+    if (closeShareBtn) {
+        closeShareBtn.addEventListener('click', () => {
+            if (shareOptions) {
+                shareOptions.style.display = 'none';
+            }
+        });
     }
-
-    exportToPDF() {
-        console.log('📄 Запрос экспорта в PDF');
-        document.dispatchEvent(new Event('exportToPDFRequested'));
-    }
-
-    captureScreenshot() {
-        console.log('📸 Запрос создания скриншота');
-        document.dispatchEvent(new Event('captureScreenshotRequested'));
-    }
-
-    showShareOptions() {
-        console.log('📱 Открытие меню шаринга');
-        const modal = document.getElementById('shareOptions');
-        if (modal) modal.style.display = 'flex';
-    }
-
-    hideShareOptions() {
-        console.log('❌ Закрытие меню шаринга');
-        const modal = document.getElementById('shareOptions');
-        if (modal) modal.style.display = 'none';
-    }
-
-    handleShareOption(type) {
-        console.log(`🌐 Запрос шаринга: ${type}`);
-
-        const eventMap = {
-            text:  'shareAsTextRequested',
-            image: 'shareAsImageRequested',
-            social:'shareToSocialRequested'
-        };
-
-        if (eventMap[type]) {
-            document.dispatchEvent(new Event(eventMap[type]));
-        }
-
-        this.hideShareOptions();
-    }
-
-    shareToSocial() {
-        console.log('🌐 Шаринг через Web Share API');
-
-        if (!navigator.share) {
-            alert('Браузер не поддерживает Web Share API.');
-            return;
-        }
-
-        navigator.share({
-            title: 'FinCalc.TJ - Расчет депозита',
-            text:  'Посмотри мой расчет депозита 👇',
-            url: window.location.href
-        })
-        .then(()  => console.log('✨ Успешный шаринг'))
-        .catch(err => console.log('❌ Ошибка шаринга:', err));
-    }
-}
-
-
-// ============================
-// 📌 ТОЧКА ВХОДА ДЛЯ COMPONENT-LOADER
-// ============================
-export function init() {
-    try {
-        window.exportPanelComponent = new ExportPanelComponent();
-        console.log('⚙️ ExportPanel init() выполнен');
-    } catch (err) {
-        console.error('❌ Ошибка init ExportPanelComponent:', err);
-    }
+    
+    // Обработчики для кнопок в модальном окне
+    document.querySelectorAll('.share-option-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const type = this.getAttribute('data-type');
+            console.log('🌐 Выбран тип шаринга:', type);
+            
+            // Закрываем модальное окно
+            if (shareOptions) {
+                shareOptions.style.display = 'none';
+            }
+            
+            // Обработка в основном скрипте
+            switch(type) {
+                case 'text':
+                    document.dispatchEvent(new Event('shareAsTextRequested'));
+                    break;
+                case 'image':
+                    document.dispatchEvent(new Event('shareAsImageRequested'));
+                    break;
+                case 'social':
+                    document.dispatchEvent(new Event('shareToSocialRequested'));
+                    break;
+            }
+        });
+    });
+    
+    return true;
 }

@@ -1,46 +1,26 @@
-//
-//  charts.js
-//  
-//
-//  Created by SUM TJK on 31.12.25.
-//
-// modules/charts.js
-// Chart data preparation for FinCalc.TJ
-// Pure functions: no DOM, no Chart.js
+let depositChart = null;
 
-/**
- * Builds a time series for a single scenario (e.g. with/without capitalization)
- * @param {Array} calculations - monthly calculations array
- * @returns {{labels: string[], values: number[]}}
- */
-export function buildTimeSeries(calculations) {
-  const labels = [];
-  const values = [];
+export function initChart(formatNumber) {
+  const canvas = document.getElementById('depositChart');
+  if (!canvas) return;
 
-  calculations.forEach(item => {
-    labels.push(item.date);
-    values.push(item.endAmount);
+  const ctx = canvas.getContext('2d');
+
+  // 💣 испавляет ошибку "Canvas already in use"
+  if (depositChart) {
+    depositChart.destroy();
+  }
+
+  depositChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: [],
+      datasets: [
+        { label: 'Без капитализации', data: [], borderColor: '#dc3545', fill: true, tension: 0.4 },
+        { label: 'Ручная капитализация', data: [], borderColor: '#fd7e14', fill: true, tension: 0.4 },
+        { label: 'Автоматическая капитализация', data: [], borderColor: '#28a745', fill: true, tension: 0.4 },
+      ]
+    },
+    options: { responsive: true, maintainAspectRatio: false }
   });
-
-  return { labels, values };
 }
-
-/**
- * Builds comparison series for multiple scenarios
- * @param {Object} scenarios - map { scenarioName: calculations[] }
- * @returns {{labels: string[], series: Object}}
- */
-export function buildComparisonSeries(scenarios) {
-  const scenarioNames = Object.keys(scenarios);
-  const firstScenario = scenarios[scenarioNames[0]] || [];
-
-  const labels = firstScenario.map(item => item.date);
-  const series = {};
-
-  scenarioNames.forEach(name => {
-    series[name] = scenarios[name].map(item => item.endAmount);
-  });
-
-  return { labels, series };
-}
-
