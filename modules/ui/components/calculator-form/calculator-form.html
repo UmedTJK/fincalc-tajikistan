@@ -1,0 +1,121 @@
+<!-- Компонент: Калькуляторная форма -->
+<div class="input-section">
+    <div class="input-group">
+        <h2>📊 Входные данные</h2>
+        
+        <!-- Валюта и начальная сумма -->
+        <div class="form-group">
+            <label for="initialDeposit">Начальная сумма</label>
+            <input type="number" id="initialDeposit" value="50000.31" step="0.01">
+        </div>
+
+        <div class="form-group">
+            <label for="currency">Валюта депозита</label>
+            <select id="currency" class="currency-select">
+                <option value="TJS" selected>🇹🇯 TJS</option>
+                <option value="USD">🇺🇸 USD</option>
+                <option value="RUB">🇷🇺 RUB</option>
+                <option value="EUR">🇪🇺 EUR</option>
+            </select>
+        </div>
+
+        <!-- Ставки -->
+        <div class="form-group">
+            <label for="annualRate">Годовая ставка (%)</label>
+            <input type="number" id="annualRate" value="16" step="0.1">
+        </div>
+
+        <div class="form-group">
+            <label for="taxRate">Налог на доход (%)</label>
+            <input type="number" id="taxRate" value="12" step="0.1">
+        </div>
+
+        <!-- Пополнение и срок -->
+        <div class="form-group">
+            <label for="monthlyContribution">Ежемесячное пополнение</label>
+            <input type="number" id="monthlyContribution" value="0" step="100">
+        </div>
+
+        <div class="form-group">
+            <label for="termMonths">Срок (месяцев)</label>
+            <input type="number" id="termMonths" value="24" min="1" max="120">
+        </div>
+
+        <!-- Полноширинные поля -->
+        <div class="form-group full-width">
+            <label for="capitalizationType">Тип капитализации</label>
+            <select id="capitalizationType" class="capitalization-select">
+                <option value="none">🚫 Без капитализации (проценты на карту)</option>
+                <option value="auto">⚡ Автоматическая капитализация</option>
+                <option value="manual">👐 Ручная капитализация</option>
+            </select>
+        </div>
+
+        <div class="form-group full-width">
+            <label for="startDate">Дата начала депозита</label>
+            <input type="date" id="startDate" value="2025-09-10">
+        </div>
+    </div>
+
+    <!-- Результаты -->
+    <div class="results-section">
+        <h2>📈 Расчетные показатели</h2>
+        <div class="result-card">
+            <span class="result-label">Чистая годовая ставка</span>
+            <span class="result-value" id="netAnnualRate">14.08%</span>
+        </div>
+        <div class="result-card">
+            <span class="result-label">Чистая месячная ставка</span>
+            <span class="result-value" id="netMonthlyRate">1.1733%</span>
+        </div>
+        <div class="result-card">
+            <span class="result-label">Месячный доход (на начальную сумму)</span>
+            <span class="result-value" id="monthlyIncome">807.65</span>
+        </div>
+        <div class="result-card">
+            <span class="result-label">Итого вложено</span>
+            <span class="result-value" id="totalContributions">308,844.31</span>
+        </div>
+        <div class="result-card">
+            <span class="result-label">Общий доход</span>
+            <span class="result-value" id="totalInterest">0.00</span>
+        </div>
+        <div class="result-card highlight">
+            <span class="result-label">Итоговая сумма</span>
+            <span class="result-value highlight" id="finalAmount">0.00</span>
+        </div>
+    </div>
+
+    <!-- Блок: Выбор банка и депозита -->
+    <div class="input-group">
+        <h2>🏦 Выбор банка и депозита</h2>
+
+        <!-- Банк -->
+        <div class="form-group full-width">
+            <label for="bankSelect">Банк</label>
+            <select id="bankSelect">
+                <option value="">-- Выберите банк --</option>
+            </select>
+        </div>
+
+        <!-- Депозит -->
+        <div class="form-group full-width">
+            <label for="depositSelect">Депозит</label>
+            <select id="depositSelect" disabled>
+                <option value="">-- Сначала выберите банк --</option>
+            </select>
+        </div>
+
+        <!-- Срок -->
+        <div class="form-group full-width" id="termGroup" style="display:none;">
+            <label for="termSelect">Срок депозита</label>
+            <select id="termSelect"></select>
+        </div>
+
+        <!-- Валюта -->
+        <div class="form-group full-width" id="currencyGroup" style="display:none;">
+            <label for="depositCurrencySelect">Валюта вклада</label>
+            <select id="depositCurrencySelect"></select>
+        </div>
+    </div>
+</div>

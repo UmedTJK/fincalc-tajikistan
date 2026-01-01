@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Components</title>
+    <style>
+        .container { border: 2px solid #ccc; padding: 20px; margin: 20px; }
+        .success { color: green; }
+        .error { color: red; }
+        .loading { color: orange; }
+    </style>
+</head>
+<body>
+    <h1>Debug Компонентов FinCalc.TJ</h1>
+    
+    <div id="header-container" class="container">
+        <h3>Header Component</h3>
+        <div id="header-status" class="loading">Загрузка...</div>
+    </div>
+    
+    <div id="calculator-container" class="container">
+        <h3>Calculator Component</h3>
+        <div id="calculator-status" class="loading">Загрузка...</div>
+    </div>
+    
+    <div id="export-container" class="container">
+        <h3>Export Component</h3>
+        <div id="export-status" class="loading">Загрузка...</div>
+    </div>
+    
+    <div id="table-chart-container" class="container">
+        <h3>Table & Chart Component</h3>
+        <div id="table-chart-status" class="loading">Загрузка...</div>
+    </div>
+    
+    <script type="module">
+        import { ComponentLoader } from './modules/utils/component-loader.js';
+        
+        async function testAllComponents() {
+            console.log('=== НАЧАЛО ТЕСТА КОМПОНЕНТОВ ===');
+            
+            const loader = new ComponentLoader();
+            const components = [
+                { name: 'header',           selector: '#header-container',        status: 'header-status' },
+                { name: 'calculator-form',  selector: '#calculator-container',    status: 'calculator-status' },
+                { name: 'export-panel',     selector: '#export-container',        status: 'export-status' },
+                { name: 'table-chart',      selector: '#table-chart-container',   status: 'table-chart-status' }
+            ];
+
+            for (const c of components) {
+                console.log(`\n📦 Тестируем: ${c.name}`);
+                
+                const statusEl = document.getElementById(c.status);
+                if (!statusEl) {
+                    console.error(`❌ Элемент статуса не найден: ${c.status}`);
+                    continue;
+                }
+
+                statusEl.className = 'loading';
+                statusEl.textContent = 'Загрузка...';
+
+                const ok = await loader.load(c.name, c.selector);
+
+                statusEl.className = ok ? 'success' : 'error';
+                statusEl.textContent = ok ? '✅ Успешно' : '❌ Ошибка';
+            }
+
+            console.log('\n=== ТЕСТ ЗАВЕРШЕН ===');
+        }
+        
+        document.addEventListener('DOMContentLoaded', testAllComponents);
+    </script>
+</body>
+</html>

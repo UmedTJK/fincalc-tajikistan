@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Тест компонентов</title>
+</head>
+<body>
+    <h1>Тест загрузки компонентов</h1>
+    
+    <div id="header-container" style="border: 2px solid red; padding: 20px; margin: 20px;">
+        Header будет здесь
+    </div>
+    
+    <div id="calculator-container" style="border: 2px solid blue; padding: 20px; margin: 20px;">
+        Calculator будет здесь
+    </div>
+    
+    <div id="export-container" style="border: 2px solid green; padding: 20px; margin: 20px;">
+        Export будет здесь
+    </div>
+    
+    <div id="table-chart-container" style="border: 2px solid orange; padding: 20px; margin: 20px;">
+        Table & Chart будет здесь
+    </div>
+    
+    <script type="module">
+        import { ComponentLoader } from './modules/utils/component-loader.js';
+        
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('Тестирование загрузки компонентов...');
+            
+            const loader = new ComponentLoader();
+            
+            // Тестируем загрузку каждого компонента
+            const components = [
+                'header',
+                'calculator-form', 
+                'export-panel',
+                'table-chart'
+            ];
+            
+            for (const component of components) {
+                console.log(`\n=== Тест компонента: ${component} ===`);
+                try {
+                    const success = await loader.load(component, `#${component}-container`);
+                    console.log(`${component}: ${success ? '✅ Успех' : '❌ Ошибка'}`);
+                } catch (error) {
+                    console.error(`💥 Критическая ошибка с ${component}:`, error);
+                }
+            }
+            
+            console.log('\n=== Тест завершен ===');
+        });
+    </script>
+</body>
+</html>

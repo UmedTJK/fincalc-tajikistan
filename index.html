@@ -17,256 +17,23 @@
 </head>
 <body data-theme="default">
 
-<header class="hero">
-<nav class="nav-bar">
-  <div class="inner">
-    <div class="brand">FinCalc.TJ</div>
-    <div class="nav-links">
-      <a href="#">Калькулятор</a>
-      <a href="#">Банки</a>
-      <a href="#">FAQ</a>
-      <a href="#">Контакты</a>
-      <button class="cta-small">Войти</button>
-    </div>
-  </div>
-</nav>
-
-  <div class="hero-content">
-    <h1>
-      Точные <span class="accent">депозиты</span> без путаницы  
-      в ставках, налогах и капитализации
-    </h1>
-    <p>
-      Простой и понятный калькулятор депозитов с актуальными ставками
-      банков Таджикистана. Нацелен на просвещение и практическую пользу.
-    </p>
-
-    <div class="hero-cta">
-      <input type="email" placeholder="Email (не обязательно)">
-      <button class="cta">Рассчитать депозит</button>
-    </div>
-
-    <small class="sub-note">
-      Без регистрации, без рекламы, без сбора данных.
-    </small>
-  </div>
+<!-- Контейнер для динамической загрузки header компонента -->
+<header class="hero" id="header-container">
+  <!-- Header будет загружен сюда динамически -->
 </header>
 
 <section class="calculator-area">
   <div class="main-container">
     <div class="container">
         <div class="main-content">
-            <!-- Весь остальной контент калькулятора -->
-            <div class="input-section">
-                <div class="input-group">
-                    <h2>📊 Входные данные</h2>
-                    
-                    <!-- Валюта и начальная сумма -->
-                    <div class="form-group">
-                        <label for="initialDeposit">Начальная сумма</label>
-                        <input type="number" id="initialDeposit" value="50000.31" step="0.01">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="currency">Валюта депозита</label>
-                        <select id="currency" class="currency-select">
-                            <option value="TJS" selected>🇹🇯 TJS</option>
-                            <option value="USD">🇺🇸 USD</option>
-                            <option value="RUB">🇷🇺 RUB</option>
-                            <option value="EUR">🇪🇺 EUR</option>
-                        </select>
-                    </div>
-
-                    <!-- Ставки -->
-                    <div class="form-group">
-                        <label for="annualRate">Годовая ставка (%)</label>
-                        <input type="number" id="annualRate" value="16" step="0.1">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="taxRate">Налог на доход (%)</label>
-                        <input type="number" id="taxRate" value="12" step="0.1">
-                    </div>
-
-                    <!-- Пополнение и срок -->
-                    <div class="form-group">
-                        <label for="monthlyContribution">Ежемесячное пополнение</label>
-                        <input type="number" id="monthlyContribution" value="0" step="100">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="termMonths">Срок (месяцев)</label>
-                        <input type="number" id="termMonths" value="24" min="1" max="120">
-                    </div>
-
-                    <!-- Полноширинные поля -->
-                    <div class="form-group full-width">
-                        <label for="capitalizationType">Тип капитализации</label>
-                        <select id="capitalizationType" class="capitalization-select">
-                            <option value="none">🚫 Без капитализации (проценты на карту)</option>
-                            <option value="auto">⚡ Автоматическая капитализация</option>
-                            <option value="manual">👐 Ручная капитализация</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group full-width">
-                        <label for="startDate">Дата начала депозита</label>
-                        <input type="date" id="startDate" value="2025-09-10">
-                    </div>
-                </div>
-
-                <!-- Результаты -->
-                <div class="results-section">
-                    <h2>📈 Расчетные показатели</h2>
-                    <div class="result-card">
-                        <span class="result-label">Чистая годовая ставка</span>
-                        <span class="result-value" id="netAnnualRate">14.08%</span>
-                    </div>
-                    <div class="result-card">
-                        <span class="result-label">Чистая месячная ставка</span>
-                        <span class="result-value" id="netMonthlyRate">1.1733%</span>
-                    </div>
-                    <div class="result-card">
-                        <span class="result-label">Месячный доход (на начальную сумму)</span>
-                        <span class="result-value" id="monthlyIncome">807.65 </span>
-                    </div>
-                    <div class="result-card">
-                        <span class="result-label">Итого вложено</span>
-                        <span class="result-value" id="totalContributions">308,844.31 </span>
-                    </div>
-                    <div class="result-card">
-                        <span class="result-label">Общий доход</span>
-                        <span class="result-value" id="totalInterest">0.00 </span>
-                    </div>
-                    <div class="result-card highlight">
-                        <span class="result-label">Итоговая сумма</span>
-                        <span class="result-value highlight" id="finalAmount">0.00</span>
-                    </div>
-                </div>
-
-                <!-- Блок: Выбор банка и депозита -->
-                <div class="input-group">
-                    <h2>🏦 Выбор банка и депозита</h2>
-
-                    <!-- Банк -->
-                    <div class="form-group full-width">
-                        <label for="bankSelect">Банк</label>
-                        <select id="bankSelect">
-                            <option value="">-- Выберите банк --</option>
-                        </select>
-                    </div>
-
-                    <!-- Депозит -->
-                    <div class="form-group full-width">
-                        <label for="depositSelect">Депозит</label>
-                        <select id="depositSelect" disabled>
-                            <option value="">-- Сначала выберите банк --</option>
-                        </select>
-                    </div>
-
-                    <!-- Срок -->
-                    <div class="form-group full-width" id="termGroup" style="display:none;">
-                        <label for="termSelect">Срок депозита</label>
-                        <select id="termSelect"></select>
-                    </div>
-
-                    <!-- Валюта -->
-                    <div class="form-group full-width" id="currencyGroup" style="display:none;">
-                        <label for="depositCurrencySelect">Валюта вклада</label>
-                        <select id="depositCurrencySelect"></select>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Кнопки экспорта -->
-            <div class="export-section">
-                <button class="export-btn" id="exportBtn">
-                    <svg class="icon" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
-                    </svg>
-                    Экспортировать в Excel
-                </button>
-
-                <button class="export-btn pdf-btn" id="exportPdfBtn">
-                    <svg class="icon" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M19,3H5C3.9,3,3,3.9,3,5v14c0,1.1,0.9,2,2,2h14c1.1,0,2-0.9,2-2V5C21,3.9,20.1,3,19,3z M9.5,15H8V9h1.5V15z M12.75,15h-1.5V9h1.5V15z M16,15h-1.5V9H16V15z"/>
-                    </svg>
-                    Экспортировать в PDF
-                </button>
-
-                <button class="export-btn screenshot-btn" id="screenshotBtn">
-                    <svg class="icon" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M10,10H8V18H10V10M14,10H12V18H14V10M16,10H15V18H16V10Z"/>
-                    </svg>
-                    Скриншот графика
-                </button>
-
-                <button class="export-btn share-btn" id="shareBtn">
-                    <svg class="icon" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M18,16.08C17.24,16.08 16.56,16.38 16.04,16.85L8.91,12.7C8.96,12.47 9,12.24 9,12C9,11.76 8.96,11.53 8.91,11.3L15.96,7.19C16.5,7.69 17.21,8 18,8A3,3 0 0,0 21,5A3,3 0 0,0 18,2A3,3 0 0,0 15,5C15,5.24 15.04,5.47 15.09,5.7L8.04,9.81C7.5,9.31 6.79,9 6,9A3,3 0 0,0 3,12A3,3 0 0,0 6,15C6.79,15 7.5,14.69 8.04,14.19L15.16,18.34C15.11,18.55 15.08,18.77 15.08,19C15.08,20.61 16.39,21.91 18,21.91C19.61,21.91 20.92,20.61 20.92,19A2.92,2.92 0 0,0 18,16.08Z"/>
-                    </svg>
-                    Поделиться расчетом
-                </button>
-            </div>
-
-            <!-- Модальное окно шаринга -->
-            <div class="share-options" id="shareOptions" style="display: none;">
-                <div class="share-modal">
-                    <h3>📤 Поделиться расчетом</h3>
-                    <div class="share-buttons">
-                        <button class="share-option-btn" data-type="text">
-                            📝 Текстовый формат
-                        </button>
-                        <button class="share-option-btn" data-type="image">
-                            🖼️ Скриншот графика
-                        </button>
-                        <button class="share-option-btn" data-type="social">
-                            🌐 Соцсети
-                        </button>
-                    </div>
-                    <button class="close-share" id="closeShareBtn">✕</button>
-                </div>
-            </div>
-
-            <!-- Таблица помесячного прогноза -->
-            <div class="table-container">
-                <div class="table-header">
-                    <h2>📅 Помесячный прогноз</h2>
-                </div>
-                <div style="overflow-x: auto;">
-                    <table id="calculationsTable">
-                        <thead>
-                            <tr>
-                                <th>Месяц</th>
-                                <th>Дата</th>
-                                <th>Сумма в начале месяца</th>
-                                <th>Начислено процентов</th>
-                                <th>Подоходный налог (12%)</th>
-                                <th>Сумма капитализации</th>
-                                <th>Ежемесячное пополнение</th>
-                                <th>Сумма в конце месяца</th>
-                            </tr>
-                        </thead>
-                        <tbody id="calculationsBody">
-                            <!-- Данные будут добавлены через JavaScript -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- График роста депозита -->
-            <div class="table-container">
-                <div class="table-header">
-                    <h2>📈 Визуализация роста депозита</h2>
-                </div>
-                <div style="padding: 20px;">
-                    <canvas id="depositChart" height="300"></canvas>
-                </div>
-            </div>
-
-            <div class="footer-note">
-                💡 Файл будет сохранен в формате CSV и откроется в Excel. Все формулы и расчеты выполнены автоматически.
-            </div>
+            <!-- Calculator Form будет загружен сюда -->
+            <div id="calculator-container"></div>
+            
+            <!-- Export Panel будет загружен сюда -->
+            <div id="export-container"></div>
+            
+            <!-- Table & Chart будет загружен сюда -->
+            <div id="table-chart-container"></div>
         </div>
     </div>
   </div>
@@ -340,14 +107,6 @@
                 localStorage.setItem('selectedTheme', selectedTheme);
             });
         });
-    });
-</script>
-
-<script>
-    document.addEventListener('scroll', () => {
-        const nav = document.querySelector('.nav-bar')
-        if (window.scrollY > 20) nav.classList.add('scrolled')
-        else nav.classList.remove('scrolled')
     });
 </script>
 

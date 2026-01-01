@@ -10,7 +10,10 @@
 ├── ROADMAP.md
 ├── VERSIONING.md
 ├── assets
+│   └── images
+│       └── Finance.avif
 ├── backup_banks_legacy.js
+├── debug.html
 ├── index.html
 ├── modules
 │   ├── calc
@@ -24,9 +27,12 @@
 │   ├── export
 │   │   ├── csv.js
 │   │   └── pdf.js
+│   ├── test-components.html
 │   ├── ui
+│   │   ├── applyProductRules.js
 │   │   ├── banks-ui.js
 │   │   ├── chart-ui.js
+│   │   ├── components
 │   │   ├── displayResults.js
 │   │   ├── selectBank.js
 │   │   ├── selectProduct.js
@@ -34,8 +40,9 @@
 │   │   ├── table.js
 │   │   └── themes.js
 │   └── utils
+│       ├── component-loader.js
 │       └── format.js
 ├── script.js
 └── style.css
 
-8 directories, 31 files
+10 directories, 36 files
