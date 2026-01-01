@@ -15,6 +15,38 @@
 
 ## 🚀 Текущая версия проекта
 
+## v0.5.2 — Structural Cleanup
+
+### Changed
+- Reorganized `script.js` into clear logical sections
+- Removed chaotic function order and improved file predictability
+- Centralized UI updates in `calculateDeposit()`
+
+### Notes
+- No behavior changes
+- No business logic changes
+- No formula, rate, tax, or capitalization changes
+
+
+## v0.5.1 — Stability & UI Fixes
+
+### Fixed
+- Fixed broken data flow causing empty monthly forecast table
+- Fixed empty deposit growth chart after UI refactor
+- Fixed critical syntax error in `share.js` that stopped JS execution
+- Removed broken template literal fragment from share module
+- Replaced undefined `showToast` with `showNotification`
+
+### Improved
+- Added safety checks to prevent rendering table with empty data
+- Added runtime assertions to validate calculation and chart data flow
+- Standardized Share UI logic and fallback behavior
+
+### Notes
+- No business logic or financial formulas were changed
+- Calculations, interest, taxes, and capitalization logic remain intact
+
+
 ## v0.5.0 — UI Refactor & Stabilization
 **Release date:** 2025-12-31
 

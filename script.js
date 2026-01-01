@@ -1,7 +1,7 @@
 /**
  * =====================================================
  * FinCalc.TJ — Main Application Script
- * Version: v0.4.5 (FIXED)
+ * Version: v0.4.5 (FIXED-CLEAN)
  *
  * This file intentionally contains orchestration logic.
  * Heavy logic is gradually extracted into /modules.
@@ -9,18 +9,40 @@
  */
 
 // =====================================================
-// 1. IMPORTS
+// 1. IMPORTS (clean + sorted) - ОБНОВЛЕННЫЙ ИМПОРТ ДЛЯ SHARE.JS
 // =====================================================
-import { calculateMonthlyInterest } from './modules/interest.js';
-import { banksData } from './modules/banks.js';
+
+// 📊 Логика расчётов
+import {
+  calculateMonthlyInterest,
+  calculateDepositPlan
+} from './modules/calc/interest.js';
+
+// 🏦 Данные банков
+import { banksData } from './modules/data/banks.js';
+
+// 🧮 UI — selects
+import { initBankSelect } from './modules/ui/selectBank.js';
+import { initProductSelect } from './modules/ui/selectProduct.js';
+
+// 📊 Экспорт
 import { generateCSVReport } from './modules/export/csv.js';
-import { buildTimeSeries, buildComparisonSeries } from './modules/charts.js';
 import { exportToPDF as generatePDF } from './modules/export/pdf.js';
+
+// 📈 Графики
+import { buildTimeSeries, buildComparisonSeries } from './modules/charts.js';
+import { initChart, updateChart, takeChartScreenshot } from './modules/ui/chart-ui.js';
+
+// 🔧 Утилиты
 import { formatNumber, formatDate } from './modules/utils/format.js';
 import { renderCalculationsTable } from './modules/ui/table.js';
-import { initChart, updateChart, takeChartScreenshot } from './modules/ui/chart-ui.js';
+
+// 🎨 Темы
 import { initThemeSwitcher } from './modules/ui/themes.js';
+
+// 🔗 Шаринг - ОБНОВЛЕННЫЙ ИМПОРТ ДЛЯ ВАШЕГО SHARE.JS
 import {
+  prepareShareData,
   shareCalculation,
   showShareOptions,
   hideShareOptions,
@@ -82,11 +104,14 @@ function calculateWithCapitalization() {
         monthDate.setMonth(startDate.getMonth() + month - 1);
         const formattedDate = formatDate(monthDate);
         
-        const { gross, tax, net } = calculateMonthlyInterest(
-          currentAmount,
-          grossAnnualRate,
-          taxRate
-        );
+        const { interest: gross, tax, net, newBalance } = calculateMonthlyInterest(
+        currentAmount,
+        grossAnnualRate * 100, // конвертация обратно в %
+         month,                 // передаём номер месяца
+        capitalizationType !== 'none', 
+        taxRate
+      );
+
         
         let capitalizedAmount = 0;
         let endAmount = currentAmount;
@@ -256,6 +281,18 @@ function calculateDeposit() {
     document.getElementById('totalInterest').textContent = formatNumber(totalInterest);
     document.getElementById('finalAmount').textContent = formatNumber(finalAmount);
 
+    // ПОДГОТОВКА ДАННЫХ ДЛЯ ШАРИНГА
+    prepareShareData({
+        initialDeposit,
+        annualRate: annualRate * 100, // Преобразуем обратно в проценты
+        taxRate: taxRate * 100, // Преобразуем обратно в проценты
+        monthlyContribution,
+        termMonths,
+        finalAmount,
+        totalInterest,
+        formatNumber
+    });
+
     // Обновляем таблицу
     renderCalculationsTable(calculations, formatNumber);
 
@@ -350,27 +387,11 @@ function exportToPDF() {
 }
 
 // =====================================================
-// 7. BANK / DEPOSIT SELECTION LOGIC
+// 7. BANK / DEPOSIT SELECTION LOGIC - ИСПРАВЛЕНА ДЛЯ ТЕКУЩЕЙ СТРУКТУРЫ banks.js
 // =====================================================
 
 /**
- * Применение выбранного депозита к форме
- */
-function applyDepositOption(deposit, option, selectedCurrency = null) {
-  const currency = selectedCurrency || Object.keys(option.rates)[0];
-  if (!option.rates[currency]) return;
-
-  document.getElementById("currency").value = currency;
-  document.getElementById("annualRate").value = option.rates[currency];
-  document.getElementById("initialDeposit").value = deposit.minAmount[currency] || 0;
-  document.getElementById("termMonths").value = option.term;
-  document.getElementById("capitalizationType").disabled = !deposit.capitalization;
-
-  calculateDeposit();
-}
-
-/**
- * Инициализация выбора банков и депозитов
+ * Инициализация выбора банков и депозитов - ДЛЯ УПРОЩЕННОЙ СТРУКТУРЫ banks.js
  */
 function initBanks() {
   const bankSelect = document.getElementById("bankSelect");
@@ -384,7 +405,7 @@ function initBanks() {
   Object.keys(banksData).forEach(bank => {
     const option = document.createElement("option");
     option.value = bank;
-    option.textContent = bank;
+    option.textContent = banksData[bank].name;
     bankSelect.appendChild(option);
   });
 
@@ -398,10 +419,15 @@ function initBanks() {
     const bank = bankSelect.value;
     if (!bank) return;
 
-    banksData[bank].forEach((deposit, index) => {
+    // Используем текущую структуру: banksData[bank].products
+    const products = banksData[bank].products;
+    
+    // products - это объект, преобразуем его ключи в опции
+    Object.keys(products).forEach((productKey) => {
+      const product = products[productKey];
       const option = document.createElement("option");
-      option.value = index;
-      option.textContent = deposit.depositName;
+      option.value = productKey;
+      option.textContent = product.type || productKey;
       depositSelect.appendChild(option);
     });
 
@@ -410,92 +436,42 @@ function initBanks() {
 
   depositSelect.addEventListener("change", () => {
     const bank = bankSelect.value;
-    const depositIndex = depositSelect.value;
-    if (!bank || depositIndex === "") return;
+    const productKey = depositSelect.value;
+    if (!bank || productKey === "") return;
 
-    const deposit = banksData[bank][depositIndex];
-    termSelect.innerHTML = "";
-
-    if (deposit.options && deposit.options.length > 0) {
-      deposit.options.forEach((opt, idx) => {
-        const option = document.createElement("option");
-        option.value = idx;
-        option.textContent = `${opt.term} мес.`;
-        termSelect.appendChild(option);
-      });
-
-      termGroup.style.display = "block";
-      setTimeout(() => termGroup.classList.add("show"), 50);
-
-      termSelect.value = 0;
-      updateCurrencyOptions(deposit, deposit.options[0]);
-    }
+    const deposit = banksData[bank].products[productKey];
+    
+    // Применяем данные депозита к форме
+    document.getElementById("annualRate").value = deposit.rate;
+    document.getElementById("currency").value = deposit.currency || "TJS";
+    
+    // Для упрощенной структуры устанавливаем фиксированные значения
+    document.getElementById("initialDeposit").value = 100000; // минимальная сумма по умолчанию
+    document.getElementById("termMonths").value = 12; // стандартный срок
+    
+    // Прячем дополнительные поля (не используются в упрощенной структуре)
+    termGroup.style.display = "none";
+    currencyGroup.style.display = "none";
+    
+    // Обновляем расчет
+    calculateDeposit();
   });
 
-  termSelect.addEventListener("change", () => {
-    const bank = bankSelect.value;
-    const depositIndex = depositSelect.value;
-    if (!bank || depositIndex === "") return;
-    const deposit = banksData[bank][depositIndex];
-    const option = deposit.options[termSelect.value];
-    updateCurrencyOptions(deposit, option);
-  });
-
-  currencySelect.addEventListener("change", () => {
-    const bank = bankSelect.value;
-    const depositIndex = depositSelect.value;
-    if (!bank || depositIndex === "") return;
-    const deposit = banksData[bank][depositIndex];
-    const option = deposit.options[termSelect.value];
-    applyDepositOption(deposit, option, currencySelect.value);
-  });
-
-  function updateCurrencyOptions(deposit, option) {
-    currencySelect.innerHTML = "";
-    Object.entries(option.rates).forEach(([cur, rate]) => {
-      const optionEl = document.createElement("option");
-      optionEl.value = cur;
-      optionEl.textContent = `${cur} (${rate}%)`;
-      currencySelect.appendChild(optionEl);
-    });
-
-    currencyGroup.style.display = "block";
-    setTimeout(() => currencyGroup.classList.add("show"), 50);
-
-    applyDepositOption(deposit, option, Object.keys(option.rates)[0]);
-  }
+  // Инициализация termSelect и currencySelect не требуется для упрощенной структуры
+  // Прячем эти элементы
+  termGroup.style.display = "none";
+  currencyGroup.style.display = "none";
 }
 
-// =====================================================
-// 8. APP BOOTSTRAP
-// =====================================================
-
 /**
- * Инициализация приложения при загрузке страницы
+ * Инициализация обработчиков событий шаринга
  */
-document.addEventListener('DOMContentLoaded', function() {
-  // Инициализация модулей
-  initBanks();
-  initThemeSwitcher();
-  initChart(formatNumber);
-  initCapitalization();
-
-  // Добавляем обработчики событий для всех полей ввода
-  const inputs = ['initialDeposit', 'annualRate', 'taxRate', 'monthlyContribution', 'termMonths', 'startDate'];
-  inputs.forEach(id => {
-    document.getElementById(id).addEventListener('input', calculateDeposit);
-  });
-  
-  // Добавляем обработчик для выбора капитализации
-  document.getElementById('capitalizationType').addEventListener('change', calculateDeposit);
-  
-  // Добавляем обработчики для кнопок экспорта
-  document.getElementById('exportBtn').addEventListener('click', exportToExcel);
-  document.getElementById('exportPdfBtn').addEventListener('click', exportToPDF);
-  document.getElementById('screenshotBtn').addEventListener('click', takeChartScreenshot);
-  
+function initShareButtons() {
   // Обработчик для кнопки "Поделиться"
-  document.getElementById('shareBtn').addEventListener('click', showShareOptions);
+  const shareBtn = document.getElementById('shareBtn');
+  if (shareBtn) {
+    shareBtn.addEventListener('click', showShareOptions);
+  }
   
   // Добавляем обработчики для кнопок выбора способа шаринга
   document.querySelectorAll('.share-option-btn').forEach(btn => {
@@ -516,15 +492,69 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   
   // Закрытие по клику вне модального окна
-  document.getElementById('shareOptions').addEventListener('click', function(e) {
-      if (e.target === this) hideShareOptions();
-  });
+  const shareOptionsModal = document.getElementById('shareOptions');
+  if (shareOptionsModal) {
+    shareOptionsModal.addEventListener('click', function(e) {
+        if (e.target === this) hideShareOptions();
+    });
+  }
   
   // Закрытие по ESC
   document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') hideShareOptions();
   });
+}
+
+// =====================================================
+// 8. APP BOOTSTRAP - ОСТАВИЛИ ОДИН DOMContentLoaded
+// =====================================================
+
+/**
+ * Инициализация приложения при загрузке страницы
+ */
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('[FinCalc] Инициализация приложения...');
+  
+  // Инициализация модулей
+  initBanks();
+  initThemeSwitcher();
+  initChart(formatNumber);
+  initCapitalization();
+  initShareButtons(); // Добавили инициализацию кнопок шаринга
+
+  // Добавляем обработчики событий для всех полей ввода
+  const inputs = ['initialDeposit', 'annualRate', 'taxRate', 'monthlyContribution', 'termMonths', 'startDate'];
+  inputs.forEach(id => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.addEventListener('input', calculateDeposit);
+    }
+  });
+  
+  // Добавляем обработчик для выбора капитализации
+  const capitalizationTypeElement = document.getElementById('capitalizationType');
+  if (capitalizationTypeElement) {
+    capitalizationTypeElement.addEventListener('change', calculateDeposit);
+  }
+  
+  // Добавляем обработчики для кнопок экспорта
+  const exportBtn = document.getElementById('exportBtn');
+  if (exportBtn) {
+    exportBtn.addEventListener('click', exportToExcel);
+  }
+  
+  const exportPdfBtn = document.getElementById('exportPdfBtn');
+  if (exportPdfBtn) {
+    exportPdfBtn.addEventListener('click', exportToPDF);
+  }
+  
+  const screenshotBtn = document.getElementById('screenshotBtn');
+  if (screenshotBtn) {
+    screenshotBtn.addEventListener('click', takeChartScreenshot);
+  }
 
   // Первоначальный расчет
   calculateDeposit();
+  
+  console.log('[FinCalc] Приложение успешно инициализировано');
 });
