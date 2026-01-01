@@ -3,168 +3,356 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Калькулятор депозита</title>
+    <title>FinCalc.TJ | Калькулятор депозитов Таджикистана</title>
     <link rel="stylesheet" href="style.css">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-            
-            
-            
-            <!-- Подключаем Chart.js -->
-            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-            <script type="module" src="script.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Подключаем Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="module" src="script.js"></script>
 
+    <style>
+        /* Стили для баннера */
+        .header-banner {
+            background: linear-gradient(135deg, #1a237e 0%, #283593 25%, #3949ab 50%, #5c6bc0 100%);
+            color: white;
+            padding: 40px 0;
+            margin: -20px -20px 30px -20px;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Для темных тем немного изменим баннер */
+        body[data-theme="dark-gradient"] .header-banner,
+        body[data-theme="futuristic"] .header-banner {
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+        }
+        
+        body[data-theme="premium"] .header-banner {
+            background: linear-gradient(135deg, #1a2a6c 0%, #b21f1f 50%, #fdbb2d 100%);
+        }
+        
+        body[data-theme="glass"] .header-banner {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(118, 75, 162, 0.9) 100%);
+            backdrop-filter: blur(20px);
+        }
+        
+        .header-banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(103, 58, 183, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(33, 150, 243, 0.3) 0%, transparent 50%);
+            z-index: 1;
+        }
+        
+        .banner-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .banner-text {
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        .banner-text h1 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .banner-text p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 600px;
+            line-height: 1.6;
+        }
+        
+        .banner-icon {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .stats {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        
+        .stat-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .theme-switcher-banner {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .theme-btn-banner {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 8px 16px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .theme-btn-banner:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+        }
+        
+        .theme-btn-banner.active {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            font-weight: 600;
+        }
+        
+        @media (max-width: 768px) {
+            .header-banner {
+                padding: 30px 0;
+                margin: -15px -15px 25px -15px;
+            }
+            
+            .banner-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 20px;
+            }
+            
+            .banner-text h1 {
+                font-size: 2rem;
+                justify-content: center;
+            }
+            
+            .theme-switcher-banner {
+                justify-content: center;
+            }
+            
+            .stats {
+                justify-content: center;
+            }
+        }
+        
+        /* Основной контейнер без отступов сверху для баннера */
+        .container {
+            margin-top: 0;
+        }
+        
+        .main-content {
+            padding-top: 0;
+        }
+    </style>
 </head>
-<body>
+<body data-theme="default">
+    <!-- Новый баннерный хедер -->
+    <div class="header-banner">
+        <div class="banner-content">
+            <div class="banner-text">
+                <h1>
+                    <span class="banner-icon">
+                        <svg width="32" height="32" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+                        </svg>
+                    </span>
+                    FinCalc.TJ
+                </h1>
+                <p>Точный расчет доходности депозитов банков Таджикистана с учетом налогов, капитализации и ежемесячных пополнений</p>
+                
+                <div class="stats">
+                    <div class="stat-badge">
+                        <span>🏦</span>
+                        <span>3 банка</span>
+                    </div>
+                    <div class="stat-badge">
+                        <span>📊</span>
+                        <span>8+ депозитов</span>
+                    </div>
+                    <div class="stat-badge">
+                        <span>💰</span>
+                        <span>До 16.5%</span>
+                    </div>
+                    <div class="stat-badge">
+                        <span>📈</span>
+                        <span>Графики роста</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="theme-switcher-banner">
+                <button class="theme-btn-banner" data-theme="default">🎨 Классика</button>
+                <button class="theme-btn-banner" data-theme="dark-gradient">🌙 Тёмный</button>
+                <button class="theme-btn-banner" data-theme="futuristic">🚀 Футуро</button>
+                <button class="theme-btn-banner" data-theme="glass">🔮 Glass</button>
+                <button class="theme-btn-banner" data-theme="premium">💎 Премиум</button>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
-<div class="header">
-    <div class="header-content">
-        <h1>
-            <svg class="icon" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
-            </svg>
-            Калькулятор депозита
-        </h1>
-        <p>Расчет доходности депозита с учетом налогов и ежемесячных пополнений</p>
-    </div>
-    
-    <div class="theme-switcher">
-        <button class="theme-btn" data-theme="default">🎨 Классика</button>
-        <button class="theme-btn" data-theme="dark-gradient">🌙 Тёмный</button>
-        <button class="theme-btn" data-theme="futuristic">🚀 Футуро</button>
-        <button class="theme-btn" data-theme="glass">🔮 Glass</button>
-        <button class="theme-btn" data-theme="premium">💎 Премиум</button>
-    </div>
-</div>
-
         <div class="main-content">
+            <!-- Весь остальной контент БЕЗ ИЗМЕНЕНИЙ -->
             <div class="input-section">
-<div class="input-group">
-    <h2>📊 Входные данные</h2>
-    
-    <!-- Валюта и начальная сумма -->
-    
-    <div class="form-group">
-        <label for="initialDeposit">Начальная сумма</label>
-        <input type="number" id="initialDeposit" value="50000.31" step="0.01">
-    </div>
+                <div class="input-group">
+                    <h2>📊 Входные данные</h2>
+                    
+                    <!-- Валюта и начальная сумма -->
+                    <div class="form-group">
+                        <label for="initialDeposit">Начальная сумма</label>
+                        <input type="number" id="initialDeposit" value="50000.31" step="0.01">
+                    </div>
 
-    <div class="form-group">
-        <label for="currency">Валюта депозита</label>
-        <select id="currency" class="currency-select">
-            <option value="TJS" selected>🇹🇯 TJS</option>
-            <option value="USD">🇺🇸 USD</option>
-            <option value="RUB">🇷🇺 RUB</option>
-            <option value="EUR">🇪🇺 EUR</option>
-        </select>
-    </div>
+                    <div class="form-group">
+                        <label for="currency">Валюта депозита</label>
+                        <select id="currency" class="currency-select">
+                            <option value="TJS" selected>🇹🇯 TJS</option>
+                            <option value="USD">🇺🇸 USD</option>
+                            <option value="RUB">🇷🇺 RUB</option>
+                            <option value="EUR">🇪🇺 EUR</option>
+                        </select>
+                    </div>
 
+                    <!-- Ставки -->
+                    <div class="form-group">
+                        <label for="annualRate">Годовая ставка (%)</label>
+                        <input type="number" id="annualRate" value="16" step="0.1">
+                    </div>
 
+                    <div class="form-group">
+                        <label for="taxRate">Налог на доход (%)</label>
+                        <input type="number" id="taxRate" value="12" step="0.1">
+                    </div>
 
-    <!-- Ставки -->
-    <div class="form-group">
-        <label for="annualRate">Годовая ставка (%)</label>
-        <input type="number" id="annualRate" value="16" step="0.1">
-    </div>
+                    <!-- Пополнение и срок -->
+                    <div class="form-group">
+                        <label for="monthlyContribution">Ежемесячное пополнение</label>
+                        <input type="number" id="monthlyContribution" value="0" step="100">
+                    </div>
 
-    <div class="form-group">
-        <label for="taxRate">Налог на доход (%)</label>
-        <input type="number" id="taxRate" value="12" step="0.1">
-    </div>
+                    <div class="form-group">
+                        <label for="termMonths">Срок (месяцев)</label>
+                        <input type="number" id="termMonths" value="24" min="1" max="120">
+                    </div>
 
-    <!-- Пополнение и срок -->
-    <div class="form-group">
-        <label for="monthlyContribution">Ежемесячное пополнение</label>
-        <input type="number" id="monthlyContribution" value="0" step="100">
-    </div>
+                    <!-- Полноширинные поля -->
+                    <div class="form-group full-width">
+                        <label for="capitalizationType">Тип капитализации</label>
+                        <select id="capitalizationType" class="capitalization-select">
+                            <option value="none">🚫 Без капитализации (проценты на карту)</option>
+                            <option value="auto">⚡ Автоматическая капитализация</option>
+                            <option value="manual">👐 Ручная капитализация</option>
+                        </select>
+                    </div>
 
-    <div class="form-group">
-        <label for="termMonths">Срок (месяцев)</label>
-        <input type="number" id="termMonths" value="24" min="1" max="120">
-    </div>
+                    <div class="form-group full-width">
+                        <label for="startDate">Дата начала депозита</label>
+                        <input type="date" id="startDate" value="2025-09-10">
+                    </div>
+                </div>
 
-    <!-- Полноширинные поля -->
-    <div class="form-group full-width">
-        <label for="capitalizationType">Тип капитализации</label>
-        <select id="capitalizationType" class="capitalization-select">
-            <option value="none">🚫 Без капитализации (проценты на карту)</option>
-            <option value="auto">⚡ Автоматическая капитализация</option>
-            <option value="manual">👐 Ручная капитализация</option>
-        </select>
-    </div>
+                <!-- Результаты -->
+                <div class="results-section">
+                    <h2>📈 Расчетные показатели</h2>
+                    <div class="result-card">
+                        <span class="result-label">Чистая годовая ставка</span>
+                        <span class="result-value" id="netAnnualRate">14.08%</span>
+                    </div>
+                    <div class="result-card">
+                        <span class="result-label">Чистая месячная ставка</span>
+                        <span class="result-value" id="netMonthlyRate">1.1733%</span>
+                    </div>
+                    <div class="result-card">
+                        <span class="result-label">Месячный доход (на начальную сумму)</span>
+                        <span class="result-value" id="monthlyIncome">807.65 </span>
+                    </div>
+                    <div class="result-card">
+                        <span class="result-label">Итого вложено</span>
+                        <span class="result-value" id="totalContributions">308,844.31 </span>
+                    </div>
+                    <div class="result-card">
+                        <span class="result-label">Общий доход</span>
+                        <span class="result-value" id="totalInterest">0.00 </span>
+                    </div>
+                    <div class="result-card highlight">
+                        <span class="result-label">Итоговая сумма</span>
+                        <span class="result-value highlight" id="finalAmount">0.00</span>
+                    </div>
+                </div>
 
-    <div class="form-group full-width">
-        <label for="startDate">Дата начала депозита</label>
-        <input type="date" id="startDate" value="2025-09-10">
-    </div>
-</div>
+                <!-- Блок: Выбор банка и депозита -->
+                <div class="input-group">
+                    <h2>🏦 Выбор банка и депозита</h2>
 
-<!-- Замените этот раздел -->
-<div class="results-section">
-    <h2>📈 Расчетные показатели</h2>
-    <div class="result-card">
-        <span class="result-label">Чистая годовая ставка</span>
-        <span class="result-value" id="netAnnualRate">14.08%</span>
-    </div>
-    <div class="result-card">
-        <span class="result-label">Чистая месячная ставка</span>
-        <span class="result-value" id="netMonthlyRate">1.1733%</span>
-    </div>
-    <div class="result-card">
-        <span class="result-label">Месячный доход (на начальную сумму)</span>
-        <span class="result-value" id="monthlyIncome">807.65 </span>
-    </div>
-    <div class="result-card">
-        <span class="result-label">Итого вложено</span>
-        <span class="result-value" id="totalContributions">308,844.31 </span>
-    </div>
-    <div class="result-card">
-        <span class="result-label">Общий доход</span>
-        <span class="result-value" id="totalInterest">0.00 </span>
-    </div>
-    <div class="result-card highlight">
-        <span class="result-label">Итоговая сумма</span>
-        <span class="result-value highlight" id="finalAmount">0.00</span>
-    </div>
-</div>
+                    <!-- Банк -->
+                    <div class="form-group full-width">
+                        <label for="bankSelect">Банк</label>
+                        <select id="bankSelect">
+                            <option value="">-- Выберите банк --</option>
+                        </select>
+                    </div>
 
-<!-- 📊 Блок: Выбор банка и депозита -->
-<div class="input-group">
-  <h2>Выбор банка и депозита</h2>
+                    <!-- Депозит -->
+                    <div class="form-group full-width">
+                        <label for="depositSelect">Депозит</label>
+                        <select id="depositSelect" disabled>
+                            <option value="">-- Сначала выберите банк --</option>
+                        </select>
+                    </div>
 
-  <!-- Банк -->
-  <div class="form-group full-width">
-    <label for="bankSelect">Банк</label>
-    <select id="bankSelect">
-      <option value="">-- Выберите банк --</option>
-    </select>
-  </div>
+                    <!-- Срок -->
+                    <div class="form-group full-width" id="termGroup" style="display:none;">
+                        <label for="termSelect">Срок депозита</label>
+                        <select id="termSelect"></select>
+                    </div>
 
-  <!-- Депозит -->
-  <div class="form-group full-width">
-    <label for="depositSelect">Депозит</label>
-    <select id="depositSelect" disabled>
-      <option value="">-- Сначала выберите банк --</option>
-    </select>
-  </div>
-
-  <!-- Срок -->
-  <div class="form-group full-width" id="termGroup" style="display:none;">
-    <label for="termSelect">Срок депозита</label>
-    <select id="termSelect"></select>
-  </div>
-
-  <!-- Валюта -->
-  <div class="form-group full-width" id="currencyGroup" style="display:none;">
-    <label for="depositCurrencySelect">Валюта вклада</label>
-    <select id="depositCurrencySelect"></select>
-  </div>
-</div>
-
+                    <!-- Валюта -->
+                    <div class="form-group full-width" id="currencyGroup" style="display:none;">
+                        <label for="depositCurrencySelect">Валюта вклада</label>
+                        <select id="depositCurrencySelect"></select>
+                    </div>
+                </div>
             </div>
 
+            <!-- Кнопки экспорта -->
             <div class="export-section">
                 <button class="export-btn" id="exportBtn">
                     <svg class="icon" fill="currentColor" viewBox="0 0 24 24">
@@ -184,63 +372,59 @@
                     <svg class="icon" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M10,10H8V18H10V10M14,10H12V18H14V10M16,10H15V18H16V10Z"/>
                     </svg>
-                        Скриншот графика
+                    Скриншот графика
                 </button>
 
-                    <!-- НОВАЯ КНОПКА ПОДЕЛИТЬСЯ -->
-    <button class="export-btn share-btn" id="shareBtn">
-        <svg class="icon" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M18,16.08C17.24,16.08 16.56,16.38 16.04,16.85L8.91,12.7C8.96,12.47 9,12.24 9,12C9,11.76 8.96,11.53 8.91,11.3L15.96,7.19C16.5,7.69 17.21,8 18,8A3,3 0 0,0 21,5A3,3 0 0,0 18,2A3,3 0 0,0 15,5C15,5.24 15.04,5.47 15.09,5.7L8.04,9.81C7.5,9.31 6.79,9 6,9A3,3 0 0,0 3,12A3,3 0 0,0 6,15C6.79,15 7.5,14.69 8.04,14.19L15.16,18.34C15.11,18.55 15.08,18.77 15.08,19C15.08,20.61 16.39,21.91 18,21.91C19.61,21.91 20.92,20.61 20.92,19A2.92,2.92 0 0,0 18,16.08Z"/>
-        </svg>
-        Поделиться расчетом
-    </button>
-
+                <button class="export-btn share-btn" id="shareBtn">
+                    <svg class="icon" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M18,16.08C17.24,16.08 16.56,16.38 16.04,16.85L8.91,12.7C8.96,12.47 9,12.24 9,12C9,11.76 8.96,11.53 8.91,11.3L15.96,7.19C16.5,7.69 17.21,8 18,8A3,3 0 0,0 21,5A3,3 0 0,0 18,2A3,3 0 0,0 15,5C15,5.24 15.04,5.47 15.09,5.7L8.04,9.81C7.5,9.31 6.79,9 6,9A3,3 0 0,0 3,12A3,3 0 0,0 6,15C6.79,15 7.5,14.69 8.04,14.19L15.16,18.34C15.11,18.55 15.08,18.77 15.08,19C15.08,20.61 16.39,21.91 18,21.91C19.61,21.91 20.92,20.61 20.92,19A2.92,2.92 0 0,0 18,16.08Z"/>
+                    </svg>
+                    Поделиться расчетом
+                </button>
             </div>
 
-
+            <!-- Модальное окно шаринга -->
             <div class="share-options" id="shareOptions" style="display: none;">
-    <div class="share-modal">
-        <h3>📤 Поделиться расчетом</h3>
-        <div class="share-buttons">
-            <button class="share-option-btn" data-type="text">
-                📝 Текстовый формат
-            </button>
-            <button class="share-option-btn" data-type="image">
-                🖼️ Скриншот графика
-            </button>
-            <button class="share-option-btn" data-type="social">
-                🌐 Соцсети
-            </button>
-        </div>
-        <button class="close-share" id="closeShareBtn">✕</button>
+                <div class="share-modal">
+                    <h3>📤 Поделиться расчетом</h3>
+                    <div class="share-buttons">
+                        <button class="share-option-btn" data-type="text">
+                            📝 Текстовый формат
+                        </button>
+                        <button class="share-option-btn" data-type="image">
+                            🖼️ Скриншот графика
+                        </button>
+                        <button class="share-option-btn" data-type="social">
+                            🌐 Соцсети
+                        </button>
+                    </div>
+                    <button class="close-share" id="closeShareBtn">✕</button>
+                </div>
+            </div>
 
-    </div>
-</div>
-            
-
+            <!-- Таблица помесячного прогноза -->
             <div class="table-container">
                 <div class="table-header">
                     <h2>📅 Помесячный прогноз</h2>
                 </div>
                 <div style="overflow-x: auto;">
                     <table id="calculationsTable">
-            
-                <thead>
-        <tr>
-            <th>Месяц</th>
-            <th>Дата</th>
-            <th>Сумма в начале месяца</th>
-            <th>Начислено процентов</th>
-            <th>Подоходный налог (12%)</th>
-            <th>Сумма капитализации</th>
-            <th>Ежемесячное пополнение</th>
-            <th>Сумма в конце месяца</th>
-        </tr>
-    </thead>
-    <tbody id="calculationsBody">
-        <!-- Данные будут добавлены через JavaScript -->
-    </tbody>
-</table>
+                        <thead>
+                            <tr>
+                                <th>Месяц</th>
+                                <th>Дата</th>
+                                <th>Сумма в начале месяца</th>
+                                <th>Начислено процентов</th>
+                                <th>Подоходный налог (12%)</th>
+                                <th>Сумма капитализации</th>
+                                <th>Ежемесячное пополнение</th>
+                                <th>Сумма в конце месяца</th>
+                            </tr>
+                        </thead>
+                        <tbody id="calculationsBody">
+                            <!-- Данные будут добавлены через JavaScript -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
@@ -249,16 +433,86 @@
                 <div class="table-header">
                     <h2>📈 Визуализация роста депозита</h2>
                 </div>
-            <div style="padding: 20px;">
-
-        <canvas id="depositChart" height="300"></canvas>
-    </div>
-</div>
+                <div style="padding: 20px;">
+                    <canvas id="depositChart" height="300"></canvas>
+                </div>
+            </div>
 
             <div class="footer-note">
                 💡 Файл будет сохранен в формате CSV и откроется в Excel. Все формулы и расчеты выполнены автоматически.
             </div>
         </div>
     </div>
+
+    <script type="module">
+        // Импортируем функцию applyTheme
+        import { applyTheme } from './modules/ui/themes.js';
+        
+        // Делаем функцию глобально доступной
+        window.applyTheme = applyTheme;
+        
+        // Инициализация переключателей тем в баннере
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeButtons = document.querySelectorAll('.theme-btn-banner');
+            const savedTheme = localStorage.getItem('selectedTheme') || 'default';
+            
+            // Применяем сохраненную тему
+            applyTheme(savedTheme);
+            document.body.setAttribute('data-theme', savedTheme);
+            
+            // Обновляем активную кнопку
+            themeButtons.forEach(btn => {
+                const theme = btn.getAttribute('data-theme');
+                
+                if (theme === savedTheme) {
+                    btn.classList.add('active');
+                }
+                
+                btn.addEventListener('click', () => {
+                    const selectedTheme = btn.getAttribute('data-theme');
+                    
+                    // Удаляем активный класс у всех кнопок
+                    themeButtons.forEach(b => b.classList.remove('active'));
+                    // Добавляем активный класс текущей кнопке
+                    btn.classList.add('active');
+                    
+                    // Применяем тему
+                    applyTheme(selectedTheme);
+                    document.body.setAttribute('data-theme', selectedTheme);
+                    localStorage.setItem('selectedTheme', selectedTheme);
+                });
+            });
+            
+            // Также обновляем старые кнопки тем если они есть
+            const oldThemeButtons = document.querySelectorAll('.theme-btn');
+            oldThemeButtons.forEach(btn => {
+                const theme = btn.getAttribute('data-theme');
+                
+                if (theme === savedTheme) {
+                    btn.classList.add('active');
+                }
+                
+                btn.addEventListener('click', () => {
+                    const selectedTheme = btn.getAttribute('data-theme');
+                    
+                    // Обновляем оба набора кнопок
+                    themeButtons.forEach(b => b.classList.remove('active'));
+                    oldThemeButtons.forEach(b => b.classList.remove('active'));
+                    
+                    btn.classList.add('active');
+                    themeButtons.forEach(b => {
+                        if (b.getAttribute('data-theme') === selectedTheme) {
+                            b.classList.add('active');
+                        }
+                    });
+                    
+                    // Применяем тему
+                    applyTheme(selectedTheme);
+                    document.body.setAttribute('data-theme', selectedTheme);
+                    localStorage.setItem('selectedTheme', selectedTheme);
+                });
+            });
+        });
+    </script>
 </body>
 </html>
